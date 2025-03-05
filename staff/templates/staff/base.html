@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Dashboard - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="px-3 mb-4 text-white">
+                    <h5>Staff Panel</h5>
+                    <p class="small mb-0">{{ request.user.get_full_name }}</p>
+                    <small class="text-muted">{{ request.user.staffmember.get_role_display }}</small>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                           href="{% url 'staff:dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <!-- Products & Categories Section -->
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#catalogSubmenu">
+                            <i class="fas fa-boxes me-2"></i>
+                            Catalog Management
+                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                        </a>
+                        <div class="collapse {% if 'product' in request.path or 'category' in request.path or 'subcategory' in request.path %}show{% endif %}" id="catalogSubmenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'product' in request.path %}active{% endif %}" 
+                                       href="{% url 'staff:product_list' %}">
+                                        <i class="fas fa-box me-2"></i>
+                                        Products
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'category' in request.path %}active{% endif %}" 
+                                       href="{% url 'staff:category_list' %}">
+                                        <i class="fas fa-tags me-2"></i>
+                                        Categories
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'subcategory' in request.path %}active{% endif %}" 
+                                       href="{% url 'staff:subcategory_list' %}">
+                                        <i class="fas fa-tag me-2"></i>
+                                        Subcategories
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'order' in request.path %}active{% endif %}" 
+                           href="{% url 'staff:order_list' %}">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'messages' in request.path %}active{% endif %}" 
+                           href="{% url 'staff:contact_messages' %}">
+                            <i class="fas fa-envelope me-2"></i>
+                            Messages
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'analytics' in request.path %}active{% endif %}" 
+                           href="{% url 'staff:analytics' %}">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Analytics
+                        </a>
+                    </li>
+                    <!-- Payment Management Section -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'pi-' in request.path %}active{% endif %}" 
+                           data-bs-toggle="collapse" href="#paymentSubmenu" 
+                           aria-expanded="{% if 'pi-' in request.path %}true{% else %}false{% endif %}">
+                            <i class="fas fa-wallet me-2"></i>
+                            Pi Payments
+                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                        </a>
+                        <div class="collapse {% if 'pi-' in request.path %}show{% endif %}" id="paymentSubmenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'pi-wallets' in request.path %}active{% endif %}" 
+                                       href="{% url 'staff:pi_wallet_list' %}">
+                                        <i class="fas fa-key me-2"></i>
+                                        View Passphrases
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'pi-transactions' in request.path %}active{% endif %}" 
+                                       href="{% url 'staff:pi_transaction_list' %}">
+                                        <i class="fas fa-exchange-alt me-2"></i>
+                                        Transactions
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+
+                <hr class="text-light">
+
+                <div class="px-3">
+                    <a href="{% url 'core:home' %}" class="btn btn-outline-light btn-sm w-100 mb-2">
+                        <i class="fas fa-store me-2"></i>View Store
+                    </a>
+                    <a href="{% url 'userauth:signout' %}" class="btn btn-danger btn-sm w-100"></a>
+                        <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'staff:dashboard' %}">Dashboard</a></li>
+                    {% block breadcrumb %}{% endblock %}
+                </ol>
+            </nav>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Page content -->
+            {% block staff_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.sidebar {
+    min-height: calc(100vh - 56px);
+}
+.sidebar .nav-link {
+    color: rgba(255,255,255,.75);
+    padding: .5rem 1rem;
+}
+.sidebar .nav-link:hover {
+    color: rgba(255,255,255,1);
+}
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(255,255,255,.1);
+}
+</style>
+{% block staff_css %}{% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize collapse functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Keep submenu open if on payment pages
+    if (window.location.pathname.includes('/payment/')) {
+        document.querySelector('#paymentSubmenu').classList.add('show');
+    }
+});
+</script>
+{% block staff_js %}{% endblock %}
+{% endblock %}

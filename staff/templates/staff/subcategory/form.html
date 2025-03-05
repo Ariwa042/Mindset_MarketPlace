@@ -1,0 +1,110 @@
+{% extends 'staff/base.html' %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'staff:subcategory_list' %}">Subcategories</a></li>
+<li class="breadcrumb-item active">{% if subcategory %}Edit{% else %}Create{% endif %} Subcategory</li>
+{% endblock %}
+
+{% block staff_content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">{% if subcategory %}Edit{% else %}Create{% endif %} Subcategory</h4>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Parent Category Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.category.label }}</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="invalid-feedback d-block">{{ form.category.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.name.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">{{ form.description.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Image Upload -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Image</h5>
+                            {% if subcategory and subcategory.image %}
+                                <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" 
+                                     class="img-thumbnail mb-2 w-100">
+                            {% endif %}
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="invalid-feedback d-block">{{ form.image.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active Status
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <a href="{% url 'staff:subcategory_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if subcategory %}Update{% else %}Create{% endif %} Subcategory
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block staff_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview
+    const imageInput = document.querySelector('input[type="file"]');
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.querySelector('.img-thumbnail');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.classList.add('img-thumbnail', 'mb-2', 'w-100');
+                        imageInput.parentNode.insertBefore(preview, imageInput);
+                    }
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

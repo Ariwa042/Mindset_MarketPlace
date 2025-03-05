@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Process Payment - Pi Marketplace{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Complete Your Payment</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4 text-center">
+                        <h5>Order Total: π{{ order.total_amount }}</h5>
+                        <p class="text-muted">Order ID: {{ order.id|truncatechars:12 }}</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> Payment with Pi Wallet</h5>
+                        <p class="mb-0">You are paying with your verified Pi wallet. Click the button below to process your payment.</p>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-wallet me-2"></i>Complete Payment
+                            </button>
+                            <a href="{% url 'order:checkout' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Checkout
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

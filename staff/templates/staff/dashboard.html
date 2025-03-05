@@ -1,0 +1,116 @@
+{% extends 'staff/base.html' %}
+
+{% block staff_content %}
+<div class="container-fluid">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Daily Sales</h6>
+                    <h3 class="card-text mb-0">π{{ daily_sales }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Pending Orders</h6>
+                    <h3 class="card-text mb-0">{{ pending_orders }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Low Stock Items</h6>
+                    <h3 class="card-text mb-0">{{ low_stock_products }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Total Customers</h6>
+                    <h3 class="card-text mb-0">{{ total_customers }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities and Orders -->
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-12 col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Orders</h5>
+                    <a href="{% url 'staff:order_list' %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.id|truncatechars:8 }}</td>
+                                <td>{{ order.user.email }}</td>
+                                <td>π{{ order.total_amount }}</td>
+                                <td>
+                                    <span class="badge bg-{{ order.status }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activities</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for activity in recent_activities %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ activity.get_action_display }}</h6>
+                                <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                            </div>
+                            <p class="mb-1">{{ activity.description }}</p>
+                            <small>by {{ activity.staff.user.get_full_name }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">No recent activities</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block staff_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Add any dashboard charts/graphs here
+</script>
+{% endblock %}

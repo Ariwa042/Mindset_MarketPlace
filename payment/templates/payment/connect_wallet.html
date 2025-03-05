@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Connect Pi Wallet - Pi Marketplace{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Connect Your Pi Wallet</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Instructions -->
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>Important Instructions
+                        </h5>
+                        <p class="mb-0">Please enter your 24-word Pi wallet passphrase. This will be securely stored and verified by our administrators.</p>
+                    </div>
+
+                    <!-- Security Notice -->
+                    <div class="alert alert-warning mb-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-shield-alt me-2"></i>Security Notice
+                        </h5>
+                        <ul class="mb-0">
+                            <li>Make sure you're on the correct website</li>
+                            <li>Never share your passphrase with anyone except trusted platforms</li>
+                            <li>Our admin team will verify your wallet before enabling transactions</li>
+                        </ul>
+                    </div>
+
+                    <!-- Wallet Form -->
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors|join:", " }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label class="form-label">Enter Your 24-word Passphrase</label>
+                            {{ form.passphrase }}
+                            {% if form.passphrase.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.passphrase.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Enter each word separated by spaces. The order matters.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-wallet me-2"></i>Connect Wallet
+                            </button>
+                            {% if request.GET.next %}
+                                <a href="{{ request.GET.next }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Verification Status -->
+            {% if request.user.piwallet %}
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Wallet Status</h5>
+                        {% if request.user.piwallet.is_verified %}
+                            <div class="alert alert-success mb-0">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Your wallet is verified and ready for use
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-clock me-2"></i>
+                                Your wallet is pending verification. Our admin team will review it shortly.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+textarea.form-control {
+    font-family: monospace;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const textarea = form.querySelector('textarea');
+
+    form.addEventListener('submit', function(e) {
+        const words = textarea.value.trim().split(/\s+/);
+        if (words.length !== 24) {
+            e.preventDefault();
+            alert('Please enter exactly 24 words');
+            textarea.focus();
+        }
+    });
+
+    // Auto-capitalize words
+    textarea.addEventListener('input', function() {
+        this.value = this.value.toLowerCase();
+    });
+});
+</script>
+{% endblock %}

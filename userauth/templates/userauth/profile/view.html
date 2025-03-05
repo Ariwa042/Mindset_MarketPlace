@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Profile Information</h5>
+                    <a href="{% url 'userauth:profile_edit' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Name:</strong></div>
+                        <div class="col-sm-9">{{ user.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Email:</strong></div>
+                        <div class="col-sm-9">{{ user.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Phone:</strong></div>
+                        <div class="col-sm-9">{{ profile.phone_number|default:"Not set" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Date of Birth:</strong></div>
+                        <div class="col-sm-9">{{ profile.date_of_birth|default:"Not set" }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"><strong>Shipping Address:</strong></div>
+                        <div class="col-sm-9">{{ profile.default_shipping_address|default:"Not set"|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_orders %}
+                        <div class="list-group">
+                            {% for order in recent_orders %}
+                                <a href="{% url 'order:order_detail' order.id %}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Order #{{ order.id|truncatechars:8 }}</h6>
+                                        <small>{{ order.created_at|date }}</small>
+                                    </div>
+                                    <p class="mb-1">Status: {{ order.get_status_display }}</p>
+                                    <small>Total: π{{ order.total_amount }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No orders yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Account Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'userauth:change_password' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                        <a href="{% url 'order:order_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-shopping-bag"></i> View All Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

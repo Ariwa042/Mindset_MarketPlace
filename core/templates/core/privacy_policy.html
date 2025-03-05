@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy - Pi Marketplace{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="display-4 mb-4">Privacy Policy</h1>
+
+            <div class="privacy-content">
+                <section class="mb-5">
+                    <h2 class="h4 mb-4">Information We Collect</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>We collect information that you provide directly to us, including:</p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Name and contact information</li>
+                                <li class="list-group-item">Billing and shipping information</li>
+                                <li class="list-group-item">Account credentials</li>
+                                <li class="list-group-item">Order history</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 mb-4">How We Use Your Information</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>We use the information we collect to:</p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Process your orders</li>
+                                <li class="list-group-item">Send order confirmations</li>
+                                <li class="list-group-item">Provide customer support</li>
+                                <li class="list-group-item">Improve our services</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.privacy-content .card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.privacy-content .list-group-item {
+    border-left: none;
+    border-right: none;
+}
+.privacy-content .list-group-item:first-child {
+    border-top: none;
+}
+.privacy-content .list-group-item:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}

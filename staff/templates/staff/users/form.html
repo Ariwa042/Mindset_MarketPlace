@@ -1,0 +1,55 @@
+{% extends 'staff/base.html' %}
+
+{% block staff_content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">{% if user_obj %}Edit{% else %}Create{% endif %} User</h4>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row">
+                <!-- User Information -->
+                <div class="col-md-6">
+                    <h5 class="mb-3">User Information</h5>
+                    {% for field in user_form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Profile Information -->
+                <div class="col-md-6">
+                    <h5 class="mb-3">Profile Information</h5>
+                    {% for field in profile_form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <a href="{% url 'staff:user_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if user_obj %}Update{% else %}Create{% endif %} User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

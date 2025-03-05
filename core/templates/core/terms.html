@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms of Service - Pi Marketplace{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="display-4 mb-4">Terms of Service</h1>
+            
+            <div class="terms-content">
+                <section class="mb-5">
+                    <h2 class="h4 mb-4">1. Acceptance of Terms</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="mb-0">By accessing and using Pi-marketplace, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 mb-4">2. Use License</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">• Permission is granted to temporarily download one copy of the materials for personal, non-commercial transitory viewing only.</li>
+                                <li>• This is the grant of a license, not a transfer of title.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 mb-4">3. User Account</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="mb-0">To use certain features of the site, you must register for an account. You agree to provide accurate information and keep it updated.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 mb-4">4. Product Listings</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="mb-0">We strive to be as accurate as possible with product descriptions. However, we do not warrant that product descriptions or other content is accurate, complete, reliable, current, or error-free.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.terms-content .card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.terms-content .card-body {
+    color: #555;
+}
+</style>
+{% endblock %}

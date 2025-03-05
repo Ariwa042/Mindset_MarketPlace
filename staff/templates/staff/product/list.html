@@ -1,0 +1,179 @@
+{% extends 'staff/base.html' %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Products</li>
+{% endblock %}
+
+{% block staff_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Products</h1>
+    <a href="{% url 'staff:product_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add Product
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <!-- Filters -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <select class="form-select" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter">
+                    <option value="">All Status</option>
+                    {% for status in product_statuses %}
+                    <option value="{{ status.0 }}">{{ status.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td width="50">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" 
+                                 class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                        </td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.subcategory.category.name }}</td>
+                        <td>π{{ product.price }}</td>
+                        <td>
+                            {% if product.stock <= 10 %}
+                            <span class="text-danger fw-bold">{{ product.stock }}</span>
+                            {% else %}
+                            {{ product.stock }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ product.status }}">
+                                {{ product.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'staff:product_edit' product.pk %}" 
+                                   class="btn btn-sm btn-outline-primary"
+                                   data-bs-toggle="tooltip" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-success"
+                                        onclick="toggleStatus('{{ product.pk }}')"
+                                        data-bs-toggle="tooltip" 
+                                        title="Toggle Status">
+                                    <i class="fas fa-toggle-on"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <p class="text-muted mb-0">No products found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+        <nav aria-label="Products pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+
+                {% for num in products.paginator.page_range %}
+                <li class="page-item {% if products.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block staff_js %}
+<script>
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+// Filter functionality
+document.getElementById('categoryFilter').addEventListener('change', function() {
+    applyFilters();
+});
+
+document.getElementById('statusFilter').addEventListener('change', function() {
+    applyFilters();
+});
+
+function applyFilters() {
+    const category = document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    
+    let url = new URL(window.location);
+    if (category) url.searchParams.set('category', category);
+    else url.searchParams.delete('category');
+    if (status) url.searchParams.set('status', status);
+    else url.searchParams.delete('status');
+    
+    window.location = url;
+}
+
+// Toggle product status
+function toggleStatus(productId) {
+    if (confirm('Are you sure you want to toggle this product\'s status?')) {
+        fetch(`/staff/products/${productId}/toggle-status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating product status');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

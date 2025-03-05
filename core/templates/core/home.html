@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pi Marketplace - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="container-fluid bg-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 mb-4">Welcome to Pi Marketplace</h1>
+                <p class="lead mb-4">Discover amazing products and shop with Pi cryptocurrency</p>
+                <a href="{% url 'product:product_list' %}" class="btn btn-primary btn-lg">
+                    Start Shopping
+                </a>
+            </div>
+            <div class="col-md-6">
+                <img src="{% static 'images/hero-image.png' %}" alt="Shopping with Pi" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Products -->
+<div class="container my-5">
+    <h2 class="mb-4">Featured Products</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in featured_products %}
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">π{{ product.price }}</span>
+                            <a href="{% url 'product:product_detail' product.slug %}" 
+                               class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">No featured products available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Categories -->
+<div class="container my-5">
+    <h2 class="mb-4">Shop by Category</h2>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for category in top_categories %}
+            <div class="col">
+                <a href="{% url 'product:category_detail' category.slug %}" 
+                   class="text-decoration-none">
+                    <div class="card h-100">
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" class="card-img-top" 
+                                 alt="{{ category.name }}" style="height: 150px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-dark mb-0">{{ category.name }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">No categories available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- New Arrivals -->
+<div class="container my-5">
+    <h2 class="mb-4">New Arrivals</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in new_arrivals %}
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">π{{ product.price }}</span>
+                            <a href="{% url 'product:product_detail' product.slug %}" 
+                               class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">No new products available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Best Sellers -->
+<div class="container my-5">
+    <h2 class="mb-4">Best Sellers</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in best_sellers %}
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">π{{ product.price }}</span>
+                            <a href="{% url 'product:product_detail' product.slug %}" 
+                               class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">No best sellers available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

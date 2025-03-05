@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-4">
+    <h2>Order History - #{{ order.id }}</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Current Status: {{ order.get_status_display }}</h5>
+            {% if estimated_delivery %}
+            <p class="text-muted">Estimated Delivery: {{ estimated_delivery|date }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="card-body">
+            <div class="timeline">
+                {% for history in status_history %}
+                <div class="timeline-item">
+                    <div class="timeline-date">
+                        {{ history.created_at|date:"M d, Y H:i" }}
+                    </div>
+                    <div class="timeline-content">
+                        <h6>Status changed to: {{ history.get_status_display }}</h6>
+                        {% if history.notes %}
+                        <p class="text-muted">{{ history.notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5>Order Details</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.price }}</td>
+                        <td>${{ item.get_total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-right"><strong>Total Amount:</strong></td>
+                        <td>${{ order.total_amount }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

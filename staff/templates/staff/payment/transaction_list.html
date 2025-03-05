@@ -1,0 +1,79 @@
+{% extends 'staff/base.html' %}
+
+{% block staff_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Pi Transactions</h1>
+    <div class="d-flex gap-2">
+        <select class="form-select" id="statusFilter">
+            <option value="">All Status</option>
+            {% for status_code, status_label in status_choices %}
+            <option value="{{ status_code }}">{{ status_label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>User</th>
+                        <th>Order ID</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.id|truncatechars:8 }}</td>
+                        <td>{{ transaction.wallet.user.email }}</td>
+                        <td>
+                            <a href="{% url 'staff:order_detail' transaction.order.id %}">
+                                {{ transaction.order.id|truncatechars:8 }}
+                            </a>
+                        </td>
+                        <td>π{{ transaction.amount }}</td>
+                        <td>
+                            <span class="badge bg-{{ transaction.status }}">
+                                {{ transaction.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'staff:pi_wallet_detail' transaction.wallet.pk %}" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="View Wallet Details">
+                                <i class="fas fa-wallet"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">No transactions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'staff/includes/pagination.html' with page_obj=transactions %}
+    </div>
+</div>
+{% endblock %}
+
+{% block staff_js %}
+<script>
+document.getElementById('statusFilter').addEventListener('change', function() {
+    const status = this.value;
+    let url = new URL(window.location);
+    if (status) url.searchParams.set('status', status);
+    else url.searchParams.delete('status');
+    window.location = url;
+});
+</script>
+{% endblock %}
