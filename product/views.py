@@ -82,10 +82,10 @@ def search_products(request):
     if query:
         products = products.filter(
             Q(name__icontains=query) |
-            Q(description__icontains=query) |
-            Q(meta_keywords__icontains=query) |
-            Q(subcategory__name__icontains=query) |
-            Q(subcategory__category__name__icontains=query)
+            Q(description__icontains(query)) |
+            Q(meta_keywords__icontains(query)) |
+            Q(subcategory__name__icontains(query)) |
+            Q(subcategory__category__name__icontains(query))
         ).distinct()
     
     # Pagination
@@ -98,3 +98,21 @@ def search_products(request):
         'page_obj': page_obj,
     }
     return render(request, 'product/search_results.html', context)
+
+def filter_products(request):
+    category = request.GET.get('category')
+    subcategory = request.GET.get('subcategory')
+    
+    products = Product.objects.filter(status='published')
+    
+    if category and category != 'all':
+        if subcategory and subcategory != 'all':
+            products = products.filter(subcategory__slug=subcategory)
+        else:
+            products = products.filter(subcategory__category__slug=category)
+    
+    context = {
+        'products': products
+    }
+    
+    return render(request, 'product/partials/product_list_partial.html', context)

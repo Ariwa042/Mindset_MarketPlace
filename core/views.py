@@ -3,15 +3,24 @@ from django.views.generic import TemplateView
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
-from product.models import Product, Category
+from product.models import Product, Category, SubCategory
 from order.models import Order
 from .forms import ContactForm
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.db.models import Prefetch
 
 @ensure_csrf_cookie
 def home(request):
-    """Homepage view with featured products and categories"""
+    """Homepage view with featured products, categories and their subcategories"""
+    # Get categories with their active subcategories preloaded
+    categories = Category.objects.filter(is_active=True).prefetch_related(
+        Prefetch(
+            'subcategories',
+            queryset=SubCategory.objects.filter(is_active=True)
+        )
+    )
+
     context = {
         'featured_products': Product.objects.filter(
             is_featured=True, 
@@ -20,7 +29,7 @@ def home(request):
         'new_arrivals': Product.objects.filter(
             status='published'
         ).order_by('-created_at')[:4],
-        'top_categories': Category.objects.filter(is_active=True)[:6],
+        'top_categories': categories,  # Now includes subcategories
         'best_sellers': Product.objects.filter(
             status='published'
         ).order_by('-sales')[:4],

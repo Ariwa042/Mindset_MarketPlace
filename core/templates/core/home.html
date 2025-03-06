@@ -1,135 +1,121 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Pi Marketplace - Home{% endblock %}
+{% block title %}Pi Marketplace - Shop with Pi{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<div class="container-fluid bg-light py-5">
+<section class="hero-section" style="background-image: url('{% static 'images/hero-image.png' %}')">
+    <div class="hero-overlay"></div>
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="display-4 mb-4">Welcome to Pi Marketplace</h1>
-                <p class="lead mb-4">Discover amazing products and shop with Pi cryptocurrency</p>
-                <a href="{% url 'product:product_list' %}" class="btn btn-primary btn-lg">
-                    Start Shopping
-                </a>
-            </div>
-            <div class="col-md-6">
-                <img src="{% static 'images/hero-image.png' %}" alt="Shopping with Pi" class="img-fluid">
+        <div class="hero-content">
+            <h1 class="hero-title">Shop with Pi</h1>
+            <p class="hero-text">Discover amazing products and pay securely using Pi cryptocurrency</p>
+            <div class="hero-buttons">
+                <a href="{% url 'product:product_list' %}" class="btn btn-white">Start Shopping</a>
+                <a href="#featured" class="btn btn-outline-light">View Featured</a>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Featured Products -->
-<div class="container my-5">
-    <h2 class="mb-4">Featured Products</h2>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-        {% for product in featured_products %}
-            <div class="col">
-                <div class="card h-100">
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
-                         style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0">π{{ product.price }}</span>
-                            <a href="{% url 'product:product_detail' product.slug %}" 
-                               class="btn btn-outline-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <div class="col-12">
-                <p class="text-center text-muted">No featured products available.</p>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Categories -->
-<div class="container my-5">
-    <h2 class="mb-4">Shop by Category</h2>
-    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4">
+<!-- Category and Products Section -->
+<div class="container my-4">
+    <!-- Category Navigation -->
+    <div class="category-nav mb-4">
+        <div class="category-item active" data-category="all">All Products</div>
         {% for category in top_categories %}
-            <div class="col">
-                <a href="{% url 'product:category_detail' category.slug %}" 
-                   class="text-decoration-none">
-                    <div class="card h-100">
-                        {% if category.image %}
-                            <img src="{{ category.image.url }}" class="card-img-top" 
-                                 alt="{{ category.name }}" style="height: 150px; object-fit: cover;">
-                        {% endif %}
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-dark mb-0">{{ category.name }}</h5>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        {% empty %}
-            <div class="col-12">
-                <p class="text-center text-muted">No categories available.</p>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- New Arrivals -->
-<div class="container my-5">
-    <h2 class="mb-4">New Arrivals</h2>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-        {% for product in new_arrivals %}
-            <div class="col">
-                <div class="card h-100">
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
-                         style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0">π{{ product.price }}</span>
-                            <a href="{% url 'product:product_detail' product.slug %}" 
-                               class="btn btn-outline-primary">View Details</a>
-                        </div>
-                    </div>
+        <div class="category-group">
+            <div class="category-item{% if category.subcategories.exists %} has-dropdown{% endif %}" 
+                 data-category="{{ category.slug }}">
+                {{ category.name }}
+                {% if category.subcategories.exists %}
+                <i class="fas fa-chevron-down ms-2 dropdown-icon"></i>
+                <div class="subcategories-menu">
+                    <a class="subcategory-item" 
+                       data-category="{{ category.slug }}" 
+                       data-subcategory="all">
+                        All {{ category.name }}
+                    </a>
+                    {% for subcategory in category.subcategories.all %}
+                    <a class="subcategory-item" 
+                       data-category="{{ category.slug }}" 
+                       data-subcategory="{{ subcategory.slug }}">
+                        {{ subcategory.name }}
+                    </a>
+                    {% endfor %}
                 </div>
+                {% endif %}
             </div>
-        {% empty %}
-            <div class="col-12">
-                <p class="text-center text-muted">No new products available.</p>
-            </div>
+        </div>
         {% endfor %}
     </div>
-</div>
 
-<!-- Best Sellers -->
-<div class="container my-5">
-    <h2 class="mb-4">Best Sellers</h2>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-        {% for product in best_sellers %}
-            <div class="col">
-                <div class="card h-100">
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
-                         style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0">π{{ product.price }}</span>
-                            <a href="{% url 'product:product_detail' product.slug %}" 
-                               class="btn btn-outline-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <div class="col-12">
-                <p class="text-center text-muted">No best sellers available.</p>
-            </div>
-        {% endfor %}
+    <!-- Products Grid -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4" id="products-grid">
+        {% include 'product/partials/product_list_partial.html' with products=featured_products %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Category item click
+    $('.category-item').click(function(e) {
+        const hasSubcategories = $(this).find('.subcategories').length > 0;
+        if (!hasSubcategories) {
+            e.preventDefault();
+            $('.category-item').removeClass('active');
+            $(this).addClass('active');
+            
+            const category = $(this).data('category');
+            filterProducts(category, null);
+        }
+    });
+
+    // Toggle subcategories
+    $('.category-item .fa-chevron-down').click(function(e) {
+        e.stopPropagation();
+        const categoryItem = $(this).closest('.category-item');
+        $('.subcategories').not(categoryItem.find('.subcategories')).removeClass('show');
+        categoryItem.find('.subcategories').toggleClass('show');
+    });
+
+    // Subcategory item click
+    $('.subcategory-item').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        $('.category-item').removeClass('active');
+        $(this).closest('.category-group').find('.category-item').addClass('active');
+        
+        const category = $(this).data('category');
+        const subcategory = $(this).data('subcategory');
+        
+        filterProducts(category, subcategory);
+        $(this).closest('.subcategories').removeClass('show');
+    });
+
+    // Close dropdowns when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('.category-group').length) {
+            $('.subcategories').removeClass('show');
+        }
+    });
+
+    function filterProducts(category, subcategory) {
+        $.ajax({
+            url: '{% url "product:filter_products" %}',
+            data: { 
+                category: category,
+                subcategory: subcategory
+            },
+            success: function(response) {
+                $('#products-grid').html(response);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
