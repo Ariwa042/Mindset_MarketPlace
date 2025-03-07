@@ -1,94 +1,238 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ product.name }} - Pi Marketplace{% endblock %}
 
+{% block extra_css %}
+<link href="{% static 'css/product-detail.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'product:product_list' %}">Products</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'product:category_detail' product.subcategory.category.slug %}">{{ product.subcategory.category.name }}</a></li>
-            <li class="breadcrumb-item active">{{ product.name }}</li>
-        </ol>
-    </nav>
+<!-- Add floating cart button -->
+<button class="floating-cart-btn" onclick="addToCart({{ product.id }})">
+    <i class="fas fa-cart-plus"></i>
+    <span>Add to Cart</span>
+</button>
 
-    <div class="row">
-        <!-- Product Image -->
-        <div class="col-md-6">
-            <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+<div class="product-detail-section">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-content">
+                <a href="{% url 'product:product_list' %}">Products</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="{% url 'product:category_detail' product.subcategory.category.slug %}">
+                    {{ product.subcategory.category.name }}
+                </a>
+                <i class="fas fa-chevron-right"></i>
+                <span>{{ product.name }}</span>
+            </div>
         </div>
 
-        <!-- Product Details -->
-        <div class="col-md-6">
-            <h1 class="mb-3">{{ product.name }}</h1>
-            
-            <div class="mb-3">
-                {% if product.discount_price %}
-                    <h3 class="text-primary">
-                        ${{ product.discount_price }}
-                        <small class="text-decoration-line-through text-muted">${{ product.price }}</small>
-                    </h3>
-                {% else %}
-                    <h3 class="text-primary">${{ product.price }}</h3>
-                {% endif %}
-            </div>
-
-            <div class="mb-3">
-                <h5>Description</h5>
-                <p>{{ product.description }}</p>
-            </div>
-
-            {% if product.specs %}
-                <div class="mb-3">
-                    <h5>Specifications</h5>
-                    <ul class="list-unstyled">
-                        {% for key, value in product.specs.items %}
-                            <li><strong>{{ key }}:</strong> {{ value }}</li>
+        <div class="product-main">
+            <!-- Image Gallery -->
+            <div class="product-gallery">
+                <div class="gallery-main">
+                    <div class="image-slider" id="imageSlider">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="active">
+                        {% for image in product_images %}
+                        <img src="{{ image.images.url }}" alt="Product view {{ forloop.counter }}">
                         {% endfor %}
-                    </ul>
+                    </div>
+                    <div class="gallery-controls">
+                        <button class="gallery-nav prev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="gallery-nav next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="gallery-dots">
+                        <span class="dot active"></span>
+                        {% for image in product_images %}
+                        <span class="dot"></span>
+                        {% endfor %}
+                    </div>
                 </div>
-            {% endif %}
-
-            <div class="mb-3">
-                <h5>Stock Status</h5>
-                {% if product.is_in_stock %}
-                    <span class="badge bg-success">In Stock ({{ product.stock }} available)</span>
-                {% else %}
-                    <span class="badge bg-danger">Out of Stock</span>
-                {% endif %}
             </div>
 
-            {% if product.is_in_stock %}
-                <form method="post" action="{% url 'order:add_to_cart' product.id %}" class="mb-4">
-                    {% csrf_token %}
-                    <div class="d-flex gap-2 align-items-center">
-                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 100px;">
-                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+            <!-- Product Info -->
+            <div class="product-info">
+                <h1 class="product-title">{{ product.name }}</h1>
+                
+                <div class="price-section">
+                    <div class="price-tag">
+                        <span class="currency">π</span>
+                        <span class="amount">{{ product.price }}</span>
                     </div>
-                </form>
-            {% endif %}
-        </div>
-    </div>
+                    <button class="quick-add-btn" onclick="addToCart({{ product.id }})">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </div>
 
-    <!-- Related Products -->
-    {% if related_products %}
-        <div class="mt-5">
-            <h3 class="mb-4">Related Products</h3>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-                {% for related in related_products %}
-                    <div class="col">
-                        <div class="card h-100">
-                            <img src="{{ related.image.url }}" class="card-img-top" alt="{{ related.name }}">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ related.name }}</h5>
-                                <p class="card-text text-primary fw-bold">${{ related.current_price }}</p>
-                                <a href="{% url 'product:product_detail' related.slug %}" class="btn btn-primary">View Details</a>
-                            </div>
-                        </div>
+                <div class="product-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>{{ product.sales }} sold</span>
                     </div>
+                    <div class="stat-item stock-status {% if product.is_in_stock %}in-stock{% else %}out-of-stock{% endif %}">
+                        <i class="fas fa-box"></i>
+                        <span>{% if product.is_in_stock %}In Stock ({{ product.stock }}){% else %}Out of Stock{% endif %}</span>
+                    </div>
+                </div>
+
+                <div class="description-preview">
+                    <h3>About this item</h3>
+                    <div class="description-content truncated">
+                        {{ product.description|linebreaks }}
+                    </div>
+                    <button class="btn-see-more">See More</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Description Section
+        <div class="full-description-section">
+            <div class="description-tabs">
+                <button class="tab-btn active" data-tab="description">Description</button>
+                <button class="tab-btn" data-tab="specifications">Specifications</button>
+            </div>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="description">
+                    {{ product.description|linebreaks }}
+                </div>
+                <div class="tab-pane" id="specifications">
+                    {% if product.specs %}
+                    <div class="specs-grid">
+                        {% for key, value in product.specs.items %}
+                        <div class="spec-item">
+                            <span class="spec-label">{{ key }}</span>
+                            <span class="spec-value">{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Related Products Section
+        {% if related_products %}
+        <div class="related-products animate-section">
+            <h2>Related Products</h2>
+            <div class="products-slider">
+                <button class="slider-nav prev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="products-track">
+                    {% for related in related_products %}
+                    
+                    {% endfor %}
+                </div>
+                <button class="slider-nav next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        {% endif %} -->
+
+        <!-- You May Like Section -->
+        <h2>You May Also Like</h2>
+        {% if recommended_products %}
+        <div class="recommended-products animate-section">
+            <div class="products-grid">
+                {% for product in recommended_products %}
+                <div class="product-card animate-item">
+                    {% include 'product/partials/product_card.html' with product=product %}
+                </div>
                 {% endfor %}
             </div>
         </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
+
+<!-- Image Zoom Modal -->
+<div class="zoom-modal">
+    <button class="close-zoom">×</button>
+    <img src="" alt="Zoomed product image">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image gallery slider
+    const slider = document.getElementById('imageSlider');
+    const images = slider.getElementsByTagName('img');
+    const dots = document.getElementsByClassName('dot');
+    let currentSlide = 0;
+
+    function showSlide(n) {
+        [...images].forEach(img => img.classList.remove('active'));
+        [...dots].forEach(dot => dot.classList.remove('active'));
+        images[n].classList.add('active');
+        dots[n].classList.add('active');
+        currentSlide = n;
+    }
+
+    document.querySelector('.gallery-nav.prev').addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + images.length) % images.length;
+        showSlide(currentSlide);
+    });
+
+    document.querySelector('.gallery-nav.next').addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % images.length;
+        showSlide(currentSlide);
+    });
+
+    [...dots].forEach((dot, index) => {
+        dot.addEventListener('click', () => showSlide(index));
+    });
+
+    // Description truncation
+    const descContent = document.querySelector('.description-content');
+    const seeMoreBtn = document.querySelector('.btn-see-more');
+    
+    if (descContent && seeMoreBtn) {
+        seeMoreBtn.addEventListener('click', function() {
+            descContent.classList.toggle('truncated');
+            this.textContent = descContent.classList.contains('truncated') ? 'See More' : 'See Less';
+        });
+    }
+
+    // Tabs handling
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+            
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+
+    // Scroll animations
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.animate-section, .animate-item').forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
 {% endblock %}

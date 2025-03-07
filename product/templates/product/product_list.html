@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link href="{% static 'css/style.css' %}" rel="stylesheet">
+<link href="{% static 'css/product.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -43,6 +44,11 @@
         {% endfor %}
     </div>
 
+    <!-- Add this section after category navigation -->
+    <div id="category-header" class="mb-4">
+        <h2 class="category-title">All Products</h2>
+    </div>
+
     <!-- Products Grid -->
     <div class="container pb-4">
         <div id="products-grid">
@@ -55,12 +61,26 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
+    // Update category title function
+    function updateCategoryTitle(element) {
+        const header = $('#category-header h2');
+        if ($(element).hasClass('category-item')) {
+            header.text($(element).find('.category-name').text() || $(element).text());
+        } else if ($(element).hasClass('subcategory-item')) {
+            const categoryName = $(element).closest('.category-group')
+                                        .find('.category-name').text();
+            const subcategoryName = $(element).text();
+            header.text(`${subcategoryName}`);
+        }
+    }
+
     // Category click handling
     $('.category-item:not(.has-dropdown)').click(function() {
         $('.category-item').removeClass('active');
         $(this).addClass('active');
         
         const category = $(this).data('category');
+        updateCategoryTitle(this);
         filterProducts(category, null);
     });
 
@@ -87,6 +107,7 @@
         const category = $(this).data('category');
         const subcategory = $(this).data('subcategory');
         
+        updateCategoryTitle(this);
         filterProducts(category, subcategory);
         
         // Close dropdown

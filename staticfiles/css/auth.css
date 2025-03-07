@@ -53,7 +53,9 @@
     color: var(--gray-600);
     margin-bottom: 0.5rem;
 }
-
+a {
+    color: #a780b4;
+}
 .btn-auth {
     background: var(--pi-purple);
     color: white;
@@ -63,11 +65,33 @@
     transition: all 0.3s ease;
     border: none;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 .btn-auth:hover {
     background: var(--pi-purple-dark);
     transform: translateY(-2px);
+}
+
+.btn-auth.btn-outline {
+    background: transparent;
+    border: 2px solid var(--pi-purple);
+    color: var(--pi-purple);
+    margin-top: 0.5rem;
+}
+
+button.btn.btn-primary {
+    background-color: #783a8c;
+    border: none;
+}
+
+button.btn.btn-primary:hover {
+    background-color: var(--pi-purple-dark);
+    border: none;
+}
+.btn-auth.btn-outline:hover {
+    background: var(--pi-purple);
+    color: white;
 }
 
 .auth-footer {

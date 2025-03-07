@@ -2,7 +2,10 @@
 {% load static %}
 
 {% block title %}Pi Marketplace - Shop with Pi{% endblock %}
-
+{% block extra_css %}
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+<link href="{% static 'css/product.css' %}" rel="stylesheet">
+{% endblock %}
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section" style="background-image: url('{% static 'images/hero-image.png' %}')">
@@ -55,7 +58,6 @@
         </div>
         {% endfor %}
     </div>
-
     <!-- Products Grid -->
     <div class="container pb-4">
         <div id="products-grid">

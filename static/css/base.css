@@ -51,8 +51,11 @@ a {
     overflow-x: hidden;
     padding: 0;
     margin: 0;
+    background-color: whitesmoke;
 }
-
+header.header {
+    margin-bottom: -1.8em;
+}
 /* Footer */
 .footer {
     background: rgb(120 58 140);

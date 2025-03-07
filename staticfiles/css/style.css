@@ -39,11 +39,33 @@
     animation: fadeInUp 0.8s ease;
 }
 
-.hero-text {
-    font-size: 1.2rem;
+.hero-text-carousel {
+    position: relative;
+    height: 60px;  /* Adjust based on your text height */
+    overflow: hidden;
     margin-bottom: 2rem;
-    opacity: 0.9;
-    animation: fadeInUp 1s ease;
+}
+
+.hero-text {
+    position: absolute;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(20px) rotateX(90deg);
+    transition: all 1s ease;
+    visibility: hidden;
+    transform-origin: top;
+    perspective: 1000px;
+}
+
+.hero-text.active {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    visibility: visible;
+}
+
+.hero-text.exit {
+    opacity: 0;
+    transform: translateY(-20px) rotateX(-90deg);
 }
 
 .hero-buttons {
@@ -272,6 +294,7 @@
     background: white;
     padding: 1rem 0;
     border-bottom: 1px solid var(--gray-200);
+    overflow-x: scroll;
 }
 
 .category-group {

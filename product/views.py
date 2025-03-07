@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Category, SubCategory, Product
+from .models import Category, SubCategory, Product, ProductImages
 import random
 from django.db.models import Prefetch
 
@@ -28,14 +28,27 @@ def product_list(request):
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, status='published')
+    product_images = ProductImages.objects.filter(product=product)
+    
+    # Get related products from same subcategory
     related_products = Product.objects.filter(
         subcategory=product.subcategory,
         status='published'
     ).exclude(id=product.id)[:4]
     
+    # Get recommended products from same category
+    recommended_products = Product.objects.filter(
+        subcategory__category=product.subcategory.category,
+        status='published'
+    ).exclude(
+        id__in=[product.id] + list(related_products.values_list('id', flat=True))
+    ).order_by('?')[:8]  # Random selection
+    
     context = {
         'product': product,
+        'product_images': product_images,
         'related_products': related_products,
+        'recommended_products': recommended_products,
     }
     return render(request, 'product/product_detail.html', context)
 
