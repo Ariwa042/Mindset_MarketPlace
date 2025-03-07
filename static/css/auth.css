@@ -1,0 +1,143 @@
+.auth-container {
+    min-height: calc(100vh - var(--header-height));
+    display: flex;
+    align-items: center;
+    padding: 2rem 0;
+    background: var(--gray-100);
+}
+
+.auth-card {
+    background: var(--white);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.auth-header {
+    background: #783a8c;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    color: var(--white);
+}
+
+.auth-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.auth-body {
+    padding: 2rem;
+}
+
+.auth-form .form-control {
+    border: 2px solid var(--gray-200);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.auth-form .form-control:focus {
+    border-color: var(--pi-purple);
+    box-shadow: 0 0 0 0.2rem rgba(120, 58, 140, 0.15);
+}
+
+.auth-form label {
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+}
+a {
+    color: #a780b4;
+}
+.btn-auth {
+    background: var(--pi-purple);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.btn-auth:hover {
+    background: var(--pi-purple-dark);
+    transform: translateY(-2px);
+}
+
+.btn-auth.btn-outline {
+    background: transparent;
+    border: 2px solid var(--pi-purple);
+    color: var(--pi-purple);
+    margin-top: 0.5rem;
+}
+
+button.btn.btn-primary {
+    background-color: #783a8c;
+    border: none;
+}
+
+button.btn.btn-primary:hover {
+    background-color: var(--pi-purple-dark);
+    border: none;
+}
+.btn-auth.btn-outline:hover {
+    background: var(--pi-purple);
+    color: white;
+}
+
+.auth-footer {
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.auth-footer a {
+    color: var(--pi-purple);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.auth-links a {
+    color: var(--pi-purple);
+    font-size: 0.9rem;
+}
+
+.otp-field {
+    letter-spacing: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        margin: 1rem;
+    }
+    
+    .auth-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .auth-body {
+        padding: 1.5rem;
+    }
+}

@@ -10,10 +10,13 @@
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title">Shop with Pi</h1>
-            <p class="hero-text">Discover amazing products and pay securely using Pi cryptocurrency</p>
+            <div class="hero-text-carousel">
+                <p class="hero-text active">Discover amazing products and pay securely using Pi cryptocurrency</p>
+                <p class="hero-text">Join the future of digital commerce with Pi Network</p>
+                <p class="hero-text">Experience seamless shopping with instant Pi payments</p>
+            </div>
             <div class="hero-buttons">
                 <a href="{% url 'product:product_list' %}" class="btn btn-white">Start Shopping</a>
-                <a href="#featured" class="btn btn-outline-light">View Featured</a>
             </div>
         </div>
     </div>
@@ -26,34 +29,38 @@
         <div class="category-item active" data-category="all">All Products</div>
         {% for category in top_categories %}
         <div class="category-group">
-            <div class="category-item{% if category.subcategories.exists %} has-dropdown{% endif %}" 
-                 data-category="{{ category.slug }}">
-                {{ category.name }}
-                {% if category.subcategories.exists %}
-                <i class="fas fa-chevron-down ms-2 dropdown-icon"></i>
-                <div class="subcategories-menu">
-                    <a class="subcategory-item" 
-                       data-category="{{ category.slug }}" 
-                       data-subcategory="all">
-                        All {{ category.name }}
-                    </a>
-                    {% for subcategory in category.subcategories.all %}
-                    <a class="subcategory-item" 
-                       data-category="{{ category.slug }}" 
-                       data-subcategory="{{ subcategory.slug }}">
-                        {{ subcategory.name }}
-                    </a>
-                    {% endfor %}
+            {% if category.subcategories.exists %}
+                <div class="category-item has-dropdown" data-category="{{ category.slug }}">
+                    <span class="category-name">{{ category.name }}</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
                 </div>
-                {% endif %}
+            {% else %}
+                <div class="category-item" data-category="{{ category.slug }}">
+                    {{ category.name }}
+                </div>
+            {% endif %}
+
+            {% if category.subcategories.exists %}
+            <div class="subcategories-menu">
+                <div class="subcategory-item" data-category="{{ category.slug }}" data-subcategory="all">
+                    All {{ category.name }}
+                </div>
+                {% for subcategory in category.subcategories.all %}
+                <div class="subcategory-item" data-category="{{ category.slug }}" data-subcategory="{{ subcategory.slug }}">
+                    {{ subcategory.name }}
+                </div>
+                {% endfor %}
             </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
 
     <!-- Products Grid -->
-    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4" id="products-grid">
-        {% include 'product/partials/product_list_partial.html' with products=featured_products %}
+    <div class="container pb-4">
+        <div id="products-grid">
+            {% include 'product/partials/product_list_partial.html' with products=featured_products %}
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -61,30 +68,30 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
-    // Category item click
-    $('.category-item').click(function(e) {
-        const hasSubcategories = $(this).find('.subcategories').length > 0;
-        if (!hasSubcategories) {
-            e.preventDefault();
-            $('.category-item').removeClass('active');
-            $(this).addClass('active');
-            
-            const category = $(this).data('category');
-            filterProducts(category, null);
-        }
+    // Category click handling
+    $('.category-item:not(.has-dropdown)').click(function() {
+        $('.category-item').removeClass('active');
+        $(this).addClass('active');
+        
+        const category = $(this).data('category');
+        filterProducts(category, null);
     });
 
-    // Toggle subcategories
-    $('.category-item .fa-chevron-down').click(function(e) {
+    // Category with dropdown click handling
+    $('.category-item.has-dropdown').click(function(e) {
         e.stopPropagation();
-        const categoryItem = $(this).closest('.category-item');
-        $('.subcategories').not(categoryItem.find('.subcategories')).removeClass('show');
-        categoryItem.find('.subcategories').toggleClass('show');
+        const dropdown = $(this).siblings('.subcategories-menu');
+        
+        // Close other dropdowns
+        $('.subcategories-menu').not(dropdown).removeClass('show');
+        dropdown.toggleClass('show');
+        
+        // Toggle the dropdown icon
+        $(this).find('.dropdown-icon').toggleClass('rotate');
     });
 
-    // Subcategory item click
+    // Subcategory click handling
     $('.subcategory-item').click(function(e) {
-        e.preventDefault();
         e.stopPropagation();
         
         $('.category-item').removeClass('active');
@@ -94,13 +101,17 @@ $(document).ready(function() {
         const subcategory = $(this).data('subcategory');
         
         filterProducts(category, subcategory);
-        $(this).closest('.subcategories').removeClass('show');
+        
+        // Close dropdown
+        $(this).closest('.subcategories-menu').removeClass('show');
+        $('.dropdown-icon').removeClass('rotate');
     });
 
     // Close dropdowns when clicking outside
     $(document).click(function(e) {
         if (!$(e.target).closest('.category-group').length) {
-            $('.subcategories').removeClass('show');
+            $('.subcategories-menu').removeClass('show');
+            $('.dropdown-icon').removeClass('rotate');
         }
     });
 
@@ -116,6 +127,61 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Add to cart function
+    window.addToCart = function(productId) {
+        $.ajax({
+            url: `/order/cart/add/${productId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                // Update cart count
+                $('.cart-badge').text(response.total_items);
+                // Show success message
+                showToast('Product added to cart');
+            }
+        });
+    };
+
+    function getCookie(name) {
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function showToast(message) {
+        // Implement your toast notification here
+    }
+});
+</script>
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const texts = document.querySelectorAll('.hero-text');
+    let currentIndex = 0;
+
+    function rotateText() {
+        const current = texts[currentIndex];
+        const next = texts[(currentIndex + 1) % texts.length];
+        
+        // Start exit animation for current text
+        current.classList.add('exit');
+        
+        // After exit animation, switch active states
+        setTimeout(() => {
+            current.classList.remove('active', 'exit');
+            next.classList.add('active');
+            currentIndex = (currentIndex + 1) % texts.length;
+        }, 1000); // Half of the total animation time
+    }
+
+    // Initialize first text as active
+    texts[0].classList.add('active');
+    
+    // Rotate every 6 seconds (including animation time)
+    setInterval(rotateText, 6000);
 });
 </script>
 {% endblock %}

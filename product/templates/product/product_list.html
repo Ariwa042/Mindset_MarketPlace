@@ -3,114 +3,144 @@
 
 {% block title %}Products - Pi Marketplace{% endblock %}
 
+{% block extra_css %}
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <!-- Filters Sidebar -->
-        <div class="col-lg-3 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Filters</h5>
-                    <form method="get">
-                        <div class="mb-3">
-                            <label class="form-label">Category</label>
-                            {% for category in categories %}
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" 
-                                           name="category" value="{{ category.slug }}"
-                                           {% if category.slug in selected_categories %}checked{% endif %}>
-                                    <label class="form-check-label">{{ category.name }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Price Range</label>
-                            <div class="input-group mb-2">
-                                <input type="number" class="form-control" name="min_price" 
-                                       placeholder="Min" value="{{ request.GET.min_price }}">
-                                <input type="number" class="form-control" name="max_price" 
-                                       placeholder="Max" value="{{ request.GET.max_price }}">
-                            </div>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        </div>
-                    </form>
+<!-- Category and Products Section -->
+<div class="container my-4">
+    <!-- Category Navigation -->
+    <div class="category-nav mb-4">
+        <div class="category-item active" data-category="all">All Products</div>
+        {% for category in top_categories %}
+        <div class="category-group">
+            {% if category.subcategories.exists %}
+                <div class="category-item has-dropdown" data-category="{{ category.slug }}">
+                    <span class="category-name">{{ category.name }}</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
                 </div>
-            </div>
-        </div>
-
-        <!-- Products Grid -->
-        <div class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">Products</h2>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
-                            data-bs-toggle="dropdown">
-                        Sort by: {{ sort_by|default:"Latest" }}
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="?sort=latest">Latest</a></li>
-                        <li><a class="dropdown-item" href="?sort=price_low">Price: Low to High</a></li>
-                        <li><a class="dropdown-item" href="?sort=price_high">Price: High to Low</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            {% if products %}
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    {% for product in products %}
-                        <div class="col">
-                            <div class="card h-100 shadow-sm">
-                                <img src="{{ product.image.url }}" class="card-img-top" 
-                                     alt="{{ product.name }}" style="object-fit: cover; height: 200px;">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ product.name }}</h5>
-                                    <p class="card-text text-muted">{{ product.description|truncatewords:20 }}</p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="h5 mb-0">π{{ product.price }}</span>
-                                        <a href="{% url 'product:product_detail' product.slug %}" 
-                                           class="btn btn-primary">View Details</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Pagination -->
-                {% if is_paginated %}
-                    <nav aria-label="Page navigation" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                                </li>
-                            {% endif %}
-
-                            {% for num in page_obj.paginator.page_range %}
-                                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endfor %}
-
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                {% endif %}
-
             {% else %}
-                <div class="alert alert-info">
-                    No products found matching your criteria.
+                <div class="category-item" data-category="{{ category.slug }}">
+                    {{ category.name }}
                 </div>
             {% endif %}
+
+            {% if category.subcategories.exists %}
+            <div class="subcategories-menu">
+                <div class="subcategory-item" data-category="{{ category.slug }}" data-subcategory="all">
+                    All {{ category.name }}
+                </div>
+                {% for subcategory in category.subcategories.all %}
+                <div class="subcategory-item" data-category="{{ category.slug }}" data-subcategory="{{ subcategory.slug }}">
+                    {{ subcategory.name }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Products Grid -->
+    <div class="container pb-4">
+        <div id="products-grid">
+            {% include 'product/partials/product_list_partial.html' with products=featured_products %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+    // Category click handling
+    $('.category-item:not(.has-dropdown)').click(function() {
+        $('.category-item').removeClass('active');
+        $(this).addClass('active');
+        
+        const category = $(this).data('category');
+        filterProducts(category, null);
+    });
+
+    // Category with dropdown click handling
+    $('.category-item.has-dropdown').click(function(e) {
+        e.stopPropagation();
+        const dropdown = $(this).siblings('.subcategories-menu');
+        
+        // Close other dropdowns
+        $('.subcategories-menu').not(dropdown).removeClass('show');
+        dropdown.toggleClass('show');
+        
+        // Toggle the dropdown icon
+        $(this).find('.dropdown-icon').toggleClass('rotate');
+    });
+    
+    // Subcategory click handling
+    $('.subcategory-item').click(function(e) {
+        e.stopPropagation();
+        
+        $('.category-item').removeClass('active');
+        $(this).closest('.category-group').find('.category-item').addClass('active');
+        
+        const category = $(this).data('category');
+        const subcategory = $(this).data('subcategory');
+        
+        filterProducts(category, subcategory);
+        
+        // Close dropdown
+        $(this).closest('.subcategories-menu').removeClass('show');
+        $('.dropdown-icon').removeClass('rotate');
+    });
+
+    // Close dropdowns when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('.category-group').length) {
+            $('.subcategories-menu').removeClass('show');
+            $('.dropdown-icon').removeClass('rotate');
+        }
+    });
+
+    function filterProducts(category, subcategory) {
+        $.ajax({
+            url: '{% url "product:filter_products" %}',
+            data: { 
+                category: category,
+                subcategory: subcategory
+            },
+            success: function(response) {
+                $('#products-grid').html(response);
+            }
+        });
+    }
+
+    // Add to cart function
+    window.addToCart = function(productId) {
+        $.ajax({
+            url: `/order/cart/add/${productId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                // Update cart count
+                $('.cart-badge').text(response.total_items);
+                // Show success message
+                showToast('Product added to cart');
+            }
+        });
+    };
+
+    function getCookie(name) {
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function showToast(message) {
+        // Implement your toast notification here
+    }
+});
+</script>
 {% endblock %}

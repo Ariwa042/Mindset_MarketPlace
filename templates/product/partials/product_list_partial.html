@@ -1,21 +1,24 @@
-{% for product in products %}
-<div class="col">
-    <div class="card h-100">
-        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
-             style="height: 200px; object-fit: cover;">
-        <div class="card-body">
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="h5 mb-0">π{{ product.price }}</span>
-                <a href="{% url 'product:product_detail' product.slug %}" 
-                   class="btn btn-outline-primary">View Details</a>
+<div class="row g-2 g-md-3 g-lg-4">
+    {% for product in products %}
+    <div class="col">
+        <div class="product-card" onclick="window.location='{% url 'product:product_detail' product.slug %}'">
+            <div class="product-image">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            </div>
+            <div class="product-info">
+                <h5 class="product-title">{{ product.name }}</h5>
+                <div class="product-meta">
+                    <div class="price">π{{ product.price }}</div>
+                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart({{ product.id }})">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-center text-muted py-4">No products found in this category.</p>
+    </div>
+    {% endfor %}
 </div>
-{% empty %}
-<div class="col-12">
-    <p class="text-center text-muted">No products found in this category.</p>
-</div>
-{% endfor %}

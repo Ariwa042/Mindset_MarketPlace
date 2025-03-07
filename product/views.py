@@ -2,43 +2,27 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Category, SubCategory, Product
+import random
+from django.db.models import Prefetch
+
 
 def product_list(request):
-    products = Product.objects.filter(status='published')
-    featured_products = products.filter(is_featured=True)[:4]
-    categories = Category.objects.filter(is_active=True)
-    
-    # Filtering
-    category_slug = request.GET.get('category')
-    subcategory_slug = request.GET.get('subcategory')
-    min_price = request.GET.get('min_price')
-    max_price = request.GET.get('max_price')
-    sort = request.GET.get('sort', '-created_at')
-    
-    if category_slug:
-        products = products.filter(subcategory__category__slug=category_slug)
-    if subcategory_slug:
-        products = products.filter(subcategory__slug=subcategory_slug)
-    if min_price:
-        products = products.filter(price__gte=min_price)
-    if max_price:
-        products = products.filter(price__lte=max_price)
-    
-    # Sorting
-    if sort:
-        products = products.order_by(sort)
-    
-    # Pagination
-    paginator = Paginator(products, 12)  # 12 products per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
+    categories = Category.objects.filter(is_active=True).prefetch_related(
+        Prefetch(
+            'subcategories',
+            queryset=SubCategory.objects.filter(is_active=True)
+        )
+    )
+
     context = {
-        'page_obj': page_obj,
-        'featured_products': featured_products,
-        'categories': categories,
-        'current_category': category_slug,
-        'current_subcategory': subcategory_slug,
+        'featured_products': Product.objects.filter(
+            is_featured=True, 
+            status='published'
+        )[:8],
+        'top_categories': categories,  # Now includes subcategories
+        'best_sellers': Product.objects.filter(
+            status='published'
+        ).order_by('-sales')[:4],
     }
     return render(request, 'product/product_list.html', context)
 
@@ -81,7 +65,7 @@ def search_products(request):
     
     if query:
         products = products.filter(
-            Q(name__icontains=query) |
+            Q(name__icontains(query)) |
             Q(description__icontains(query)) |
             Q(meta_keywords__icontains(query)) |
             Q(subcategory__name__icontains(query)) |
@@ -103,16 +87,29 @@ def filter_products(request):
     category = request.GET.get('category')
     subcategory = request.GET.get('subcategory')
     
+    # Start with all published products
     products = Product.objects.filter(status='published')
     
+    # Apply category filter
     if category and category != 'all':
         if subcategory and subcategory != 'all':
             products = products.filter(subcategory__slug=subcategory)
         else:
             products = products.filter(subcategory__category__slug=category)
     
+    # Handle sorting
+    if category == 'all':
+        # Convert queryset to list for random shuffling
+        products = list(products)
+        random.shuffle(products)
+    else:
+        # Default sorting by newest first
+        products = products.order_by('-created_at')
+    
     context = {
-        'products': products
+        'products': products,
+        'current_category': category,
+        'current_subcategory': subcategory
     }
     
     return render(request, 'product/partials/product_list_partial.html', context)
