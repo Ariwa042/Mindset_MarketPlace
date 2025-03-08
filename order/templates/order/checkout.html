@@ -1,162 +1,113 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Checkout - Pi Marketplace{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <!-- Left Column -->
-        <div class="col-md-8">
-            <!-- Progress Steps -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between position-relative align-items-center">
-                        <div class="step active">
-                            <div class="step-circle">1</div>
-                            <div class="step-text">Shipping</div>
+<div class="checkout-section">
+    <div class="container">
+        <div class="checkout-header">
+            <h1 class="section-title">Checkout</h1>
+        </div>
+
+        <div class="checkout-content">
+            <div class="checkout-main">
+                <!-- Order Review -->
+                <div class="checkout-section-card order-review">
+                    <h2>Order Items</h2>
+                    <div class="order-items">
+                        {% for item in cart.items.all %}
+                        <div class="order-item animate-item">
+                            <div class="item-image">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            </div>
+                            <div class="item-details">
+                                <h3 class="item-title">{{ item.product.name }}</h3>
+                                <p class="item-quantity">Quantity: {{ item.quantity }}</p>
+                                <p class="item-price">π{{ item.get_cost }}</p>
+                            </div>
                         </div>
-                        <div class="step {% if wallet %}active{% endif %}">
-                            <div class="step-circle">2</div>
-                            <div class="step-text">Payment</div>
-                        </div>
-                        <div class="step">
-                            <div class="step-circle">3</div>
-                            <div class="step-text">Confirmation</div>
-                        </div>
-                        <div class="progress-line"></div>
+                        {% endfor %}
                     </div>
                 </div>
-            </div>
 
-            <!-- Wallet Status -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Pi Wallet Status</h5>
-                    {% if wallet %}
-                        {% if wallet.is_verified %}
-                            <div class="alert alert-success mb-0">
-                                <i class="fas fa-check-circle me-2"></i>
-                                Your Pi wallet is verified and ready for payment
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning mb-0">
-                                <i class="fas fa-exclamation-circle me-2"></i>
-                                Your Pi wallet is pending verification. Please wait for admin approval.
-                                <a href="{% url 'payment:connect_wallet' %}" class="alert-link">Check status</a>
-                            </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Please connect your Pi wallet before proceeding with checkout.
-                            <a href="{% url 'payment:connect_wallet' %}" class="alert-link">Connect Wallet</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Shipping Information -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">Shipping Information</h5>
-                    <form method="post" id="checkout-form">
+                <!-- Shipping Information -->
+                <div class="checkout-section-card shipping-info">
+                    <h2>Shipping Information</h2>
+                    <form method="post" id="shipping-form" class="animate-form">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="shipping_name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="shipping_name" name="shipping_name"
-                                   value="{{ request.user.get_full_name }}" required>
-                            <div class="invalid-feedback">Please enter your full name</div>
+                        <div class="form-group">
+                            <label for="shipping_address">Shipping Address</label>
+                            <input id="shipping_address" name="shipping_address" required class="form-control"></input>
                         </div>
-                        <div class="mb-3">
-                            <label for="shipping_address" class="form-label">Shipping Address</label>
-                            <textarea class="form-control" id="shipping_address" name="shipping_address" 
-                                    rows="3" required>{{ request.user.profile.default_shipping_address }}</textarea>
-                            <div class="invalid-feedback">Please enter your shipping address</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="contact_phone" class="form-label">Contact Phone</label>
-                            <input type="tel" class="form-control" id="contact_phone" name="contact_phone"
-                                   value="{{ request.user.profile.phone_number }}" required>
-                            <div class="invalid-feedback">Please enter a valid phone number</div>
+                        <div class="form-group">
+                            <label for="contact_phone">Contact Phone</label>
+                            <input type="tel" id="contact_phone" name="contact_phone" required class="form-control">
                         </div>
                     </form>
                 </div>
-            </div>
 
-            <!-- Order Items -->
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">Order Summary</h5>
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in cart.items.all %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
-                                                 style="width: 50px; height: 50px; object-fit: cover;"
-                                                 class="me-2">
-                                            <div>
-                                                <h6 class="mb-0">{{ item.product.name }}</h6>
-                                                <small class="text-muted">{{ item.product.subcategory.name }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>π{{ item.product.price }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>π{{ item.get_cost }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <!-- Pi Wallet Section -->
+                <div class="checkout-section-card wallet-section">
+                    <h2>Pi Wallet</h2>
+                    <div class="wallet-status {% if wallet and wallet.is_verified %}connected{% else %}not-connected{% endif %}">
+                        {% if wallet and wallet.is_verified %}
+                            <div class="wallet-info">
+                                <i class="fas fa-wallet"></i>
+                                <span>Wallet Connected & Verified</span>
+                                <div class="wallet-status-verified">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Verified</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="wallet-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {% if not wallet %}
+                                    <div class="wallet-message">
+                                        <h4>Wallet Not Connected</h4>
+                                        <p>Please connect your Pi Wallet to continue with checkout</p>
+                                        <button type="button" class="btn-wallet-action" id="connectWalletBtn">
+                                            Connect Wallet <i class="fas fa-plug"></i>
+                                        </button>
+                                    </div>
+                                {% elif not wallet.is_verified %}
+                                    <div class="wallet-message">
+                                        <h4>Wallet Not Verified</h4>
+                                        <p>Please verify your wallet ownership to proceed</p>
+                                        <button type="button" class="btn-wallet-action" id="verifyWalletBtn" onclick="window.location.href='{% url 'payment:connect_wallet' %}'">
+                                            Verify Wallet <i class="fas fa-shield-alt"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Right Column - Order Summary -->
-        <div class="col-md-4">
-            <div class="card sticky-top" style="top: 20px;">
-                <div class="card-body">
-                    <h5 class="card-title">Order Summary</h5>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal ({{ cart.get_total_items }} items)</span>
-                        <span>π{{ cart.get_total_price }}</span>
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <div class="summary-card">
+                    <h2>Order Summary</h2>
+                    <div class="summary-items">
+                        <div class="summary-item">
+                            <span>Subtotal</span>
+                            <span>π{{ cart.get_total_price }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Shipping</span>
+                            <span>Free</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span>π{{ cart.get_total_price }}</span>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Shipping</span>
-                        <span class="text-success">Free</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-4">
-                        <strong>Total</strong>
-                        <strong class="text-primary">π{{ cart.get_total_price }}</strong>
-                    </div>
-                    
-                    <button type="submit" form="checkout-form" 
-                            class="btn btn-primary w-100 mb-3"
-                            {% if not wallet.is_verified %}disabled{% endif %}>
-                        {% if not wallet %}
-                            Connect Wallet to Continue
-                        {% elif not wallet.is_verified %}
-                            Wallet Pending Verification
-                        {% else %}
-                            Proceed to Payment
-                        {% endif %}
+                    <button type="submit" form="shipping-form" class="btn-place-order">
+                        Place Order
+                        <i class="fas fa-arrow-right"></i>
                     </button>
-                    
-                    <a href="{% url 'order:cart_detail' %}" class="btn btn-outline-secondary w-100">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Cart
-                    </a>
                 </div>
             </div>
         </div>
@@ -166,73 +117,480 @@
 
 {% block extra_css %}
 <style>
-.progress-line {
-    position: absolute;
-    top: 25px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #dee2e6;
-    z-index: 1;
+/* Checkout Section Styles */
+.checkout-section {
+    padding: 3rem 0;
+    background: linear-gradient(to bottom, rgba(120, 58, 140, 0.05), transparent);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Checkout Header */
+.checkout-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.checkout-steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
 }
 
 .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    z-index: 2;
-    background: white;
-    text-align: center;
-    width: 50px;
+    transition: all 0.3s ease;
 }
 
-.step-circle {
-    width: 50px;
-    height: 50px;
+.step-number {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: #f8f9fa;
-    border: 2px solid #dee2e6;
+    background: var(--gray-200);
+    color: var(--gray-600);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 10px;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
 }
 
-.step.active .step-circle {
-    background: #0d6efd;
-    border-color: #0d6efd;
+.step.active .step-number {
+    background: var(--pi-purple);
     color: white;
+    transform: scale(1.1);
 }
 
 .step-text {
-    font-size: 0.875rem;
-    color: #6c757d;
+    color: var(--gray-600);
+    font-size: 0.9rem;
 }
 
-.step.active .step-text {
-    color: #0d6efd;
+.step-connector {
+    width: 100px;
+    height: 2px;
+    background: var(--gray-200);
+    margin: 0 1rem;
+}
+
+/* Checkout Content Layout */
+.checkout-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.checkout-section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    animation: slideUp 0.5s ease;
+}
+
+/* Order Items */
+.order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.order-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--gray-100);
+    transition: all 0.3s ease;
+}
+
+.order-item:hover {
+    transform: translateX(5px);
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.item-image img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--pi-purple);
+    box-shadow: 0 0 0 3px rgba(120, 58, 140, 0.1);
+}
+
+/* Wallet Section */
+.wallet-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--gray-100);
+}
+
+.wallet-status.connected {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-connect-wallet {
+    background: var(--pi-purple);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Order Summary */
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+}
+
+.summary-items {
+    margin: 1.5rem 0;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    color: var(--gray-600);
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--gray-200);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--pi-purple);
+}
+
+.btn-place-order {
+    width: 100%;
+    background: var(--pi-purple);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-place-order:hover {
+    background: var(--pi-purple-dark);
+    transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-item {
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.animate-item:nth-child(2n) {
+    animation-delay: 0.2s;
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .checkout-content {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-card {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .step-connector {
+        width: 50px;
+    }
+}
+
+@media (max-width: 576px) {
+    .checkout-steps {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .step-connector {
+        width: 2px;
+        height: 20px;
+    }
+}
+
+/* Update color variables */
+:root {
+    --pi-purple: #783a8c;
+    --pi-purple-light: #8f4ba6;
+    --pi-purple-dark: #612d73;
+    --pi-error: #ff4b4b;
+    --pi-warning: #ffa726;
+    --pi-success: #1eb37c;
+}
+
+/* Updated Wallet Section */
+.wallet-section {
+    border: 1px solid rgba(120, 58, 140, 0.1);
+}
+
+.wallet-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background: rgba(120, 58, 140, 0.05);
+}
+
+.wallet-status.connected {
+    background: rgba(30, 179, 124, 0.1);
+    color: var(--pi-success);
+}
+
+.wallet-status.not-connected {
+    background: rgba(255, 167, 38, 0.1);
+    color: var(--pi-warning);
+}
+
+.wallet-warning {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+}
+
+.wallet-warning i {
+    font-size: 2rem;
+    color: var(--pi-warning);
+}
+
+.wallet-message h4 {
+    color: var(--pi-purple);
+    margin-bottom: 0.5rem;
+}
+
+.wallet-message p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.btn-wallet-action {
+    background: var(--pi-purple);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+    margin-top: 1rem;
+}
+
+.btn-wallet-action:hover {
+    background: var(--pi-purple-dark);
+    transform: translateY(-2px);
+}
+
+/* Update other button styles */
+.btn-place-order {
+    background: var(--pi-purple);
+    opacity: {% if not wallet or not wallet.is_verified %}0.5{% else %}1{% endif %};
+    pointer-events: {% if not wallet or not wallet.is_verified %}none{% else %}all{% endif %};
+}
+
+/* Add animation for wallet status changes */
+.wallet-status {
+    transition: all 0.3s ease;
+}
+
+@keyframes walletPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.wallet-status.not-connected {
+    animation: walletPulse 2s infinite;
 }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('checkout-form').addEventListener('submit', function(e) {
-    const required = ['shipping_name', 'shipping_address', 'contact_phone'];
-    let valid = true;
-    
-    required.forEach(field => {
-        const input = document.getElementById(field);
-        if (!input.value.trim()) {
-            input.classList.add('is-invalid');
-            valid = false;
-        } else {
-            input.classList.remove('is-invalid');
-        }
-    });
-    
-    if (!valid) {
-        e.preventDefault();
-        alert('Please fill in all required fields');
+document.addEventListener('DOMContentLoaded', function() {
+    // Form handling
+    const shippingForm = document.getElementById('shipping-form');
+    const placeOrderBtn = document.querySelector('.btn-place-order');
+
+    if (shippingForm) {
+        shippingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            // Add a small delay to show the loading state
+            setTimeout(() => {
+                this.submit();
+            }, 1000);
+        });
     }
+
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.checkout-section-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.5s ease';
+        observer.observe(el);
+    });
+
+    const walletButton = document.querySelector('.btn-wallet-action');
+    const placeOrderBtn = document.querySelector('.btn-place-order');
+
+    if (walletButton) {
+        walletButton.addEventListener('click', async function() {
+            try {
+                if (!window.Pi) {
+                    alert('Pi Network SDK not found. Please make sure you are using the Pi Browser.');
+                    return;
+                }
+
+                // Connect to Pi Network
+                const scopes = ['payments'];
+                const authResponse = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                // Send auth result to your backend
+                const response = await fetch('/wallet/connect/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ auth: authResponse })
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    throw new Error('Failed to connect wallet');
+                }
+            } catch (error) {
+                console.error('Wallet connection error:', error);
+                alert('Failed to connect wallet. Please try again.');
+            }
+        });
+    }
+
+    function onIncompletePaymentFound(payment) {
+        console.log('Incomplete payment found:', payment);
+        // Handle incomplete payment
+    }
+
+    const connectWalletBtn = document.getElementById('connectWalletBtn');
+    const verifyWalletBtn = document.getElementById('verifyWalletBtn');
+    const placeOrderBtn = document.querySelector('.btn-place-order');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    async function connectPiWallet() {
+        try {
+            if (!window.Pi) {
+                alert('Please use the Pi Browser to connect your wallet.');
+                return;
+            }
+
+            window.location.href = "{% url 'payment:connect_wallet' %}";
+        } catch (error) {
+            console.error('Navigation error:', error);
+            showErrorMessage('Failed to navigate to wallet connection. Please try again.');
+        }
+    }
+
+    // Event Listeners
+    if (connectWalletBtn) {
+        connectWalletBtn.addEventListener('click', connectPiWallet);
+    }
+
+    // Disable place order button if wallet is not verified
+    if (placeOrderBtn) {
+        placeOrderBtn.disabled = {% if not wallet or not wallet.is_verified %}true{% else %}false{% endif %};
+    }
+
+    // ...existing form handling code...
 });
 </script>
 {% endblock %}

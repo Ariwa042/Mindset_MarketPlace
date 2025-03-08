@@ -50,21 +50,27 @@ def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     
     try:
-        quantity = int(request.POST.get('quantity', 1))
-        if quantity > 0:
-            cart_item.quantity = quantity
-            cart_item.save()
-    except ValueError:
-        messages.error(request, 'Invalid quantity')
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        cart = cart_item.cart
-        item_data = {
-            'total_cost': cart_item.get_cost(),
-            'cart_total': cart.get_total_price(),
-            'cart_items': cart.get_total_items(),
-        }
-        return JsonResponse(item_data)
+        if request.method == 'POST':
+            if request.content_type == 'application/json':
+                import json
+                data = json.loads(request.body)
+                quantity = int(data.get('quantity', 1))
+            else:
+                quantity = int(request.POST.get('quantity', 1))
+
+            if quantity > 0 and quantity <= cart_item.product.stock:
+                cart_item.quantity = quantity
+                cart_item.save()
+
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    cart = cart_item.cart
+                    return JsonResponse({
+                        'total_cost': str(cart_item.get_cost()),
+                        'cart_total': str(cart.get_total_price()),
+                        'cart_items': cart.get_total_items(),
+                    })
+    except (ValueError, json.JSONDecodeError):
+        pass
     
     return redirect('order:cart_detail')
 

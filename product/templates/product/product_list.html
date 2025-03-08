@@ -137,21 +137,7 @@
     }
 
     // Add to cart function
-    window.addToCart = function(productId) {
-        $.ajax({
-            url: `/order/cart/add/${productId}/`,
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            success: function(response) {
-                // Update cart count
-                $('.cart-badge').text(response.total_items);
-                // Show success message
-                showToast('Product added to cart');
-            }
-        });
-    };
+
 
     function getCookie(name) {
         let value = `; ${document.cookie}`;

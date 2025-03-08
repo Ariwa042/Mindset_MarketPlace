@@ -1,130 +1,337 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Shopping Cart - Pi Marketplace{% endblock %}
+{% block title %}Your Cart - Pi Marketplace{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4">Shopping Cart</h1>
-
-    {% if cart.items.all %}
-        <div class="row">
-            <!-- Cart Items -->
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in cart.items.all %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
-                                                 style="width: 50px; height: 50px; object-fit: cover;"
-                                                 class="me-2">
-                                            <div>
-                                                <h6 class="mb-0">{{ item.product.name }}</h6>
-                                                <small class="text-muted">{{ item.product.subcategory.name }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>π{{ item.product.current_price }}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'order:update_cart' item.id %}" 
-                                              class="d-flex align-items-center quantity-form">
-                                            {% csrf_token %}
-                                            <input type="number" name="quantity" value="{{ item.quantity }}"
-                                                   min="1" max="{{ item.product.stock }}"
-                                                   class="form-control form-control-sm" style="width: 70px;">
-                                            <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                    <td>π{{ item.get_cost }}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'order:remove_from_cart' item.id %}" 
-                                              class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+<div class="cart-section">
+    <div class="container">
+        <h1 class="section-title">Your Cart</h1>
+        {% if cart.items.exists %}
+        <div class="cart-items">
+            {% for item in cart.items.all %}
+            <div class="cart-item" data-item-id="{{ item.id }}">
+                <div class="item-image">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                </div>
+                <div class="item-details">
+                    <h3 class="item-title" title="{{ item.product.name }}">{{ item.product.name|truncatechars:30 }}</h3>
+                    <p class="item-price">π{{ item.product.price }}</p>
+                    <div class="item-actions">
+                        <div class="quantity-control">
+                            <button type="button" class="qty-btn minus"><i class="fas fa-minus"></i></button>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="quantity-input" data-item-id="{{ item.id }}">
+                            <button type="button" class="qty-btn plus"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <form method="post" action="{% url 'order:remove_from_cart' item.id %}" class="item-remove-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-remove"><i class="fas fa-trash-alt"></i> Remove</button>
+                        </form>
                     </div>
                 </div>
             </div>
-
-            <!-- Cart Summary -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Order Summary</h5>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal</span>
-                            <span>π{{ cart.get_total_price }}</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <strong>Total</strong>
-                            <strong>π{{ cart.get_total_price }}</strong>
-                        </div>
-                        <a href="{% url 'order:checkout' %}" class="btn btn-primary w-100">
-                            Proceed to Checkout
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
-    {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-            <h3>Your cart is empty</h3>
-            <p class="text-muted">Add some products to your cart and they will appear here</p>
-            <a href="{% url 'product:product_list' %}" class="btn btn-primary mt-3">
-                Continue Shopping
-            </a>
+        <div class="cart-summary">
+            <h2 class="summary-title">Order Summary</h2>
+            <p class="summary-item">Total Items: <span>{{ cart.get_total_items }}</span></p>
+            <p class="summary-item">Total Price: <span>π{{ cart.get_total_price }}</span></p>
+            <a href="{% url 'order:checkout' %}" class="btn-checkout">Proceed to Checkout</a>
         </div>
-    {% endif %}
+        {% else %}
+        <p class="empty-cart">Your cart is empty.</p>
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Cart Section Styles */
+.cart-section {
+    padding: 2rem 0;
+    background: linear-gradient(to bottom, rgba(120, 58, 140, 0.05), transparent);
+}
+
+.section-title {
+    color: var(--pi-purple);
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.cart-item {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.item-image img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.item-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--pi-purple);
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-price {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pi-purple);
+    margin-bottom: 0.5rem;
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.item-quantity-form,
+.item-remove-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.qty-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--pi-purple);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.qty-btn:hover {
+    background: var(--pi-purple-dark);
+}
+
+.qty-btn.minus {
+    border-right: 1px solid var(--gray-300);
+}
+
+.qty-btn.plus {
+    border-left: 1px solid var(--gray-300);
+}
+
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    border: none;
+    padding: 0.5rem;
+    -moz-appearance: textfield;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-input {
+    width: 60px;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+}
+
+.btn-update,
+.btn-remove {
+    background: var(--pi-purple);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-update:hover,
+.btn-remove:hover {
+    background: var(--pi-purple-dark);
+}
+
+.cart-summary {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.summary-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--pi-purple);
+    margin-bottom: 1rem;
+}
+
+.summary-item {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.summary-item span {
+    font-weight: 600;
+    color: var(--pi-purple);
+}
+
+.btn-checkout {
+    display: inline-block;
+    background: var(--pi-purple);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.btn-checkout:hover {
+    background: var(--pi-purple-dark);
+}
+
+.empty-cart {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--gray-600);
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Update cart when quantity changes
-    document.querySelectorAll('.quantity-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            fetch(this.action, {
-                method: 'POST',
-                body: new FormData(this),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Update totals
-                this.closest('tr').querySelector('td:nth-last-child(2)').textContent = 
-                    'π' + data.total_cost;
-                document.querySelector('.card-body strong:last-child').textContent = 
-                    'π' + data.cart_total;
-            });
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function updateCart(itemId, quantity) {
+        fetch(`/order/cart/update/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update item total cost
+            const cartItem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+            if (cartItem) {
+                const totalCost = parseFloat(data.total_cost).toFixed(2);
+                cartItem.querySelector('.item-price').textContent = `π${totalCost}`;
+            }
+
+            // Update cart summary
+            const summaryItems = document.querySelectorAll('.summary-item span');
+            summaryItems[0].textContent = data.cart_items;
+            summaryItems[1].textContent = `π${data.cart_total}`;
+
+            // Update cart badge in header if it exists
+            const cartBadge = document.querySelector('.cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = data.cart_items;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Handle quantity input changes
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        const minValue = parseInt(input.min);
+        const maxValue = parseInt(input.max);
+        const itemId = input.dataset.itemId;
+
+        // Handle direct input
+        input.addEventListener('change', function() {
+            let value = parseInt(this.value);
+            if (value < minValue) value = minValue;
+            if (value > maxValue) value = maxValue;
+            this.value = value;
+            updateCart(itemId, value);
+        });
+
+        // Handle plus/minus buttons
+        const plusBtn = input.nextElementSibling;
+        const minusBtn = input.previousElementSibling;
+
+        plusBtn.addEventListener('click', () => {
+            let value = parseInt(input.value);
+            if (value < maxValue) {
+                input.value = value + 1;
+                updateCart(itemId, value + 1);
+            }
+        });
+
+        minusBtn.addEventListener('click', () => {
+            let value = parseInt(input.value);
+            if (value > minValue) {
+                input.value = value - 1;
+                updateCart(itemId, value - 1);
+            }
         });
     });
+
+    function getCookie(name) {
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
 });
 </script>
 {% endblock %}

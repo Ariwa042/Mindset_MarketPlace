@@ -8,26 +8,9 @@
 {% endblock %}
 
 {% block content %}
-<!-- Add floating cart button -->
-<button class="floating-cart-btn" onclick="addToCart({{ product.id }})">
-    <i class="fas fa-cart-plus"></i>
-    <span>Add to Cart</span>
-</button>
 
 <div class="product-detail-section">
     <div class="container">
-        <!-- Breadcrumb -->
-        <div class="breadcrumb-wrapper">
-            <div class="breadcrumb-content">
-                <a href="{% url 'product:product_list' %}">Products</a>
-                <i class="fas fa-chevron-right"></i>
-                <a href="{% url 'product:category_detail' product.subcategory.category.slug %}">
-                    {{ product.subcategory.category.name }}
-                </a>
-                <i class="fas fa-chevron-right"></i>
-                <span>{{ product.name }}</span>
-            </div>
-        </div>
 
         <div class="product-main">
             <!-- Image Gallery -->
@@ -65,9 +48,6 @@
                         <span class="currency">π</span>
                         <span class="amount">{{ product.price }}</span>
                     </div>
-                    <button class="quick-add-btn" onclick="addToCart({{ product.id }})">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
                 </div>
 
                 <div class="product-stats">
@@ -88,68 +68,50 @@
                     </div>
                     <button class="btn-see-more">See More</button>
                 </div>
-            </div>
-        </div>
 
-        <!-- Full Description Section
-        <div class="full-description-section">
-            <div class="description-tabs">
-                <button class="tab-btn active" data-tab="description">Description</button>
-                <button class="tab-btn" data-tab="specifications">Specifications</button>
-            </div>
-
-            <div class="tab-content">
-                <div class="tab-pane active" id="description">
-                    {{ product.description|linebreaks }}
-                </div>
-                <div class="tab-pane" id="specifications">
-                    {% if product.specs %}
-                    <div class="specs-grid">
-                        {% for key, value in product.specs.items %}
-                        <div class="spec-item">
-                            <span class="spec-label">{{ key }}</span>
-                            <span class="spec-value">{{ value }}</span>
-                        </div>
-                        {% endfor %}
+                {% if product.is_in_stock %}
+                <form method="post" action="{% url 'order:add_to_cart' product.id %}" class="cart">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 align-items-center">
+                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 100px;">
+                        <button type="submit" class="btn btn-primary">Add to Cart<i class="fa-solid fa-cart-plus"></i></button>
                     </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div> -->
-
-        <!-- Related Products Section
-        {% if related_products %}
-        <div class="related-products animate-section">
-            <h2>Related Products</h2>
-            <div class="products-slider">
-                <button class="slider-nav prev">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div class="products-track">
-                    {% for related in related_products %}
-                    
-                    {% endfor %}
-                </div>
-                <button class="slider-nav next">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                </form>
+                {% endif %}
             </div>
         </div>
-        {% endif %} -->
+                
+        </div>
 
-        <!-- You May Like Section -->
-        <h2>You May Also Like</h2>
-        {% if recommended_products %}
-        <div class="recommended-products animate-section">
-            <div class="products-grid">
+        <!-- Image Modal -->
+        <div class="image-modal">
+            <div class="modal-header">
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+                <div class="zoom-controls">
+                    <button class="zoom-in"><i class="fas fa-search-plus"></i></button>
+                    <button class="zoom-out"><i class="fas fa-search-minus"></i></button>
+                </div>
+            </div>
+            <div class="modal-content">
+                <div class="pinch-zoom-container">
+                    <img src="" alt="Product view">
+                </div>
+            </div>
+        </div>
+
+        <!-- You May Like Section
+        <section class="recommendations">
+            <div class="section-header">
+                <h2>You May Also Like</h2>
+            </div>
+            <div class="recommendations-grid">
                 {% for product in recommended_products %}
-                <div class="product-card animate-item">
-                    {% include 'product/partials/product_card.html' with product=product %}
+                <div class="recommendation-card">
+                    {%include 'product/partials/product_list_partials.html' with product=product%}
                 </div>
                 {% endfor %}
             </div>
-        </div>
-        {% endif %}
+        </section> -->
     </div>
 </div>
 
@@ -161,6 +123,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Image gallery slider
@@ -233,6 +196,105 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.animate-section, .animate-item').forEach(el => {
         observer.observe(el);
     });
+
+    // Touch swipe handling for gallery
+    const imageSlider = document.getElementById('imageSlider');
+    const hammer = new Hammer(imageSlider);
+    
+    hammer.on('swipeleft swiperight', function(e) {
+        if (e.type === 'swipeleft') {
+            document.querySelector('.gallery-nav.next').click();
+        } else {
+            document.querySelector('.gallery-nav.prev').click();
+        }
+    });
+
+    // Fixed cart bar handling
+    const fixedCartBar = document.querySelector('.fixed-cart-bar');
+    let lastScroll = 0;
+
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > lastScroll && currentScroll > 300) {
+            fixedCartBar.classList.add('hide');
+        } else {
+            fixedCartBar.classList.remove('hide');
+        }
+        lastScroll = currentScroll;
+    });
+
+    // Image modal and zoom handling
+    const modal = document.querySelector('.image-modal');
+    const modalImg = modal.querySelector('img');
+    const zoomContainer = document.querySelector('.pinch-zoom-container');
+    let currentScale = 1;
+
+    function openModal(imgSrc) {
+        modalImg.src = imgSrc;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Reset zoom
+        currentScale = 1;
+        zoomContainer.style.transform = `scale(${currentScale})`;
+    }
+
+    // Add click handlers to gallery images
+    document.querySelectorAll('.image-slider img').forEach(img => {
+        img.addEventListener('click', () => openModal(img.src));
+    });
+
+    // Zoom controls
+    document.querySelector('.zoom-in').addEventListener('click', () => {
+        currentScale = Math.min(currentScale + 0.5, 3);
+        zoomContainer.style.transform = `scale(${currentScale})`;
+    });
+
+    document.querySelector('.zoom-out').addEventListener('click', () => {
+        currentScale = Math.max(currentScale - 0.5, 1);
+        zoomContainer.style.transform = `scale(${currentScale})`;
+    });
+
+    // Close modal
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    });
+
+    // Recommendations slider
+    const track = document.querySelector('.slider-track');
+    const items = document.querySelectorAll('.slider-item');
+    const nextBtn = document.querySelector('.nav-btn.next');
+    const prevBtn = document.querySelector('.nav-btn.prev');
+    let currentIndex = 0;
+
+    function updateSlider() {
+        const itemWidth = items[0].offsetWidth;
+        track.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+        
+        // Update button states
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= items.length - 4; // Show 4 items at once
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentIndex < items.length - 4) {
+            currentIndex++;
+            updateSlider();
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateSlider();
+        }
+    });
+
+    // Initialize slider
+    updateSlider();
 });
 </script>
 {% endblock %}
+{% block footer %}{% endblock %}

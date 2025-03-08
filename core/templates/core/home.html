@@ -7,6 +7,27 @@
 <link href="{% static 'css/product.css' %}" rel="stylesheet">
 {% endblock %}
 {% block content %}
+<style>
+    #preloader {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: #fff; 
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+    }
+
+    #preloader.fade-out {
+        opacity: 0;
+        pointer-events: none;
+    }
+</style>
 <!-- Hero Section -->
 <section class="hero-section" style="background-image: url('{% static 'images/hero-image.png' %}')">
     <div class="hero-overlay"></div>
@@ -131,21 +152,7 @@ $(document).ready(function() {
     }
 
     // Add to cart function
-    window.addToCart = function(productId) {
-        $.ajax({
-            url: `/order/cart/add/${productId}/`,
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            success: function(response) {
-                // Update cart count
-                $('.cart-badge').text(response.total_items);
-                // Show success message
-                showToast('Product added to cart');
-            }
-        });
-    };
+    
 
     function getCookie(name) {
         let value = `; ${document.cookie}`;
@@ -184,6 +191,50 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Rotate every 6 seconds (including animation time)
     setInterval(rotateText, 6000);
+});
+</script>
+<div id="preloader">
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+    <dotlottie-player 
+        src="https://lottie.host/e6a6feef-1d51-4afd-9b7e-77e0cc75d03d/XLjiwi0gTH.json" 
+        background="transparent" 
+        speed="1" 
+        style="width: 300px; height: 300px;" 
+        loop="false"
+        autoplay
+        onComplete="handleAnimationComplete(this)"
+        id="lottiePlayer">
+    </dotlottie-player>
+</div>
+
+<script>
+let animationCycles = 0;
+const MAX_CYCLES = 2;
+
+function handleAnimationComplete(player) {
+    animationCycles++;
+    if (animationCycles < MAX_CYCLES) {
+        player.play(); // Replay animation
+    } else {
+        // Fade out preloader
+        document.getElementById('preloader').classList.add('fade-out');
+        // Remove preloader from DOM after fade out
+        setTimeout(() => {
+            document.getElementById('preloader').remove();
+        }, 500);
+    }
+}
+
+// Fallback to remove preloader if animation fails
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        if (document.getElementById('preloader')) {
+            document.getElementById('preloader').classList.add('fade-out');
+            setTimeout(() => {
+                document.getElementById('preloader').remove();
+            }, 500);
+        }
+    }, 5000); // Fallback after 5 seconds
 });
 </script>
 {% endblock %}

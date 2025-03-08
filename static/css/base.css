@@ -335,9 +335,6 @@ header.header {
 }
 
 @media (max-width: 576px) {
-    body {
-        padding-bottom: 60px; /* Space for mobile navigation */
-    }
 
     .navbar-brand img {
         height: 22px;
@@ -379,7 +376,7 @@ header.header {
     }
 }
 
-/* Safe Area Insets for Modern Mobile Browsers */
+/* Safe Area Insets for Modern Mobile Browsers 
 @supports(padding: max(0px)) {
     .navbar {
         padding-left: max(1rem, env(safe-area-inset-left));
@@ -389,7 +386,7 @@ header.header {
     body {
         padding-bottom: max(var(--footer-height), env(safe-area-inset-bottom));
     }
-}
+}*/
 
 /* Remove duplicate properties and outdated styles */
 .mobile-header,

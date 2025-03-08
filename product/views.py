@@ -37,13 +37,13 @@ def product_detail(request, slug):
     ).exclude(id=product.id)[:4]
     
     # Get recommended products from same category
+    # Get recommended products from the same category
     recommended_products = Product.objects.filter(
-        subcategory__category=product.subcategory.category,
-        status='published'
-    ).exclude(
-        id__in=[product.id] + list(related_products.values_list('id', flat=True))
-    ).order_by('?')[:8]  # Random selection
-    
+        subcategory__category=product.subcategory.category,  # Get products from same category
+        status='published').exclude(
+        Q(id=product.id) |  # Exclude current product
+        Q(subcategory=product.subcategory)  # Exclude products from same subcategory
+        ).order_by('?')[:8]  # Random selection limited to 8
     context = {
         'product': product,
         'product_images': product_images,
@@ -52,7 +52,7 @@ def product_detail(request, slug):
     }
     return render(request, 'product/product_detail.html', context)
 
-def category_detail(request, category_slug):
+#def category_detail(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug, is_active=True)
     subcategories = category.subcategories.filter(is_active=True)
     products = Product.objects.filter(

@@ -114,11 +114,11 @@ def process_payment(request, order_id):
         'wallet': wallet
     })
 
-def process_pi_payment(payment_data):
-    """Process payment through Pi Network"""
-    # Implement actual Pi payment processing here
-    # This is a placeholder for Pi Network SDK integration
-    return {
-        'status': 'completed',
-        'transaction_hash': hashlib.sha256(json.dumps(payment_data).encode()).hexdigest()
-    }
+#def process_pi_payment(payment_data):
+#    """Process payment through Pi Network"""
+#    # Implement actual Pi payment processing here
+#    # This is a placeholder for Pi Network SDK integration
+#    return {
+#        'status': 'completed',
+#        'transaction_hash': hashlib.sha256(json.dumps(payment_data).encode()).hexdigest()
+#    }
