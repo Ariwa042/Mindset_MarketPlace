@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
+{% load static %}
+
 
 {% block title %}Verify Email - Pi Marketplace{% endblock %}
+{% block header %}
+<div class="header">          <!-- Logo -->
+        <a class="logo" href="{% url 'core:home' %}">
+            <img src="{% static 'images/logo.webp' %}" alt="Pi Marketplace" height="35">
+        </a>
+</div>
 
+{% endblock %}
 {% block content %}
+
 <div class="auth-container">
     <div class="container">
         <div class="row justify-content-center">

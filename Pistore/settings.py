@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -148,15 +149,17 @@ LOGOUT_REDIRECT_URL = 'home'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Email Configuration - Use console backend for testing
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Change this for production
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your.email@gmail.com'  # Replace with your Gmail
-EMAIL_HOST_PASSWORD = 'your-app-password'  # Replace with your app password
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'piphrase042@gmail.com'  # Replace with your email
+EMAIL_HOST_PASSWORD = 'gpax zbei vpyk mspr'  # Replace with your app password
+DEFAULT_FROM_EMAIL = 'Pi Marketplace <piphrase042@gmail.com>'
 
 # Add CSRF settings
 CSRF_COOKIE_SECURE = True  # for HTTPS
 CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ['https://yoursite.com']  # Update with your domain
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']  # Update with your domain

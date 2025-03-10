@@ -55,3 +55,63 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.auth-form');
+    const emailInput = form.querySelector('input[type="email"]');
+    const passwordInput = form.querySelector('input[type="password"]');
+
+    function showError(input, message) {
+        const feedback = input.nextElementSibling || document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.textContent = message;
+        if (!input.nextElementSibling) {
+            input.parentNode.appendChild(feedback);
+        }
+        input.classList.add('is-invalid');
+        feedback.classList.add('show');
+    }
+
+    function clearError(input) {
+        const feedback = input.nextElementSibling;
+        if (feedback && feedback.classList.contains('invalid-feedback')) {
+            input.classList.remove('is-invalid');
+            feedback.classList.remove('show');
+        }
+    }
+
+    emailInput.addEventListener('blur', function() {
+        clearError(this);
+        if (!this.value) {
+            showError(this, 'Email is required');
+        } else if (!/^\S+@\S+\.\S+$/.test(this.value)) {
+            showError(this, 'Please enter a valid email address');
+        }
+    });
+
+    passwordInput.addEventListener('input', function() {
+        clearError(this);
+        if (!this.value) {
+            showError(this, 'Password is required');
+        }
+    });
+
+    form.addEventListener('submit', function(e) {
+        let hasError = false;
+        
+        [emailInput, passwordInput].forEach(input => {
+            if (!input.value) {
+                showError(input, `${input.placeholder} is required`);
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,17 +1,50 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+        email = self.normalize_email(email)
+        
+        # Remove username from extra_fields if it exists
+        if 'username' in extra_fields:
+            del extra_fields['username']
+            
+        # Generate username from email
+        base_username = email.split('@')[0]
+        username = base_username
+        counter = 1
+        
+        # Ensure username uniqueness
+        while self.model.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        # Create user with generated username
+        user = self.model(email=email, username=username, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=32, unique=True)
+    username = models.CharField(max_length=32, unique=True, null=True, blank=True)  # Make optional
     first_name = models.CharField(max_length=30, blank=False)  # Make required
     last_name = models.CharField(max_length=30, blank=False)   # Make required
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  # Add to required fields
+    REQUIRED_FIELDS = ['username']  # Remove username from required fields
+
+    objects = CustomUserManager()
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
@@ -23,7 +56,7 @@ class CustomUser(AbstractUser):
         return self.profile
 
     def __str__(self):
-        return self.username
+        return self.email  # Use email instead of username
 
     class Meta:
         verbose_name = 'CustomUser'
@@ -58,10 +91,13 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class OTP(models.Model):
-    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    email = models.EmailField(null=True, blank=True)
     otp = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ['-created_at']
 
     def is_valid(self):
         return self.expires_at > timezone.now()

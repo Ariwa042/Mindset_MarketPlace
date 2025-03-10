@@ -1,103 +1,139 @@
 {% extends 'staff/base.html' %}
 
-{% block staff_content %}
-<div class="container-fluid">
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Page Header -->
+    <div class="mb-3">
+        <h1 class="h3 d-inline align-middle">Dashboard</h1>
+    </div>
+
     <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card bg-primary text-white">
+    <div class="row">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title mb-3">Daily Sales</h6>
-                    <h3 class="card-text mb-0">π{{ daily_sales }}</h3>
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Users</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-primary">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ total_users }}</h1>
+                    <div class="mb-0">
+                        <span class="text-muted">Total Registered Users</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card bg-warning">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title mb-3">Pending Orders</h6>
-                    <h3 class="card-text mb-0">{{ pending_orders }}</h3>
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Orders</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-warning">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ pending_orders }}</h1>
+                    <div class="mb-0">
+                        <span class="text-muted">Pending Orders</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card bg-danger text-white">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title mb-3">Low Stock Items</h6>
-                    <h3 class="card-text mb-0">{{ low_stock_products }}</h3>
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Stock</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ low_stock_products }}</h1>
+                    <div class="mb-0">
+                        <span class="text-muted">Low Stock Items</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card bg-success text-white">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title mb-3">Total Customers</h6>
-                    <h3 class="card-text mb-0">{{ total_customers }}</h3>
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Revenue</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-success">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">π{{ daily_revenue }}</h1>
+                    <div class="mb-0">
+                        <span class="text-muted">Today's Revenue</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activities and Orders -->
+    <!-- Recent Activities -->
     <div class="row">
-        <!-- Recent Orders -->
-        <div class="col-12 col-lg-8 mb-4">
+        <div class="col-12 col-lg-8">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Recent Orders</h5>
-                    <a href="{% url 'staff:order_list' %}" class="btn btn-sm btn-primary">View All</a>
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Orders</h5>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in recent_orders %}
-                            <tr>
-                                <td>{{ order.id|truncatechars:8 }}</td>
-                                <td>{{ order.user.email }}</td>
-                                <td>π{{ order.total_amount }}</td>
-                                <td>
-                                    <span class="badge bg-{{ order.status }}">
-                                        {{ order.get_status_display }}
-                                    </span>
-                                </td>
-                                <td>{{ order.created_at|date:"M d, Y" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for order in recent_orders %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Order #{{ order.id|truncatechars:8 }}</h6>
+                                    <p class="mb-1">{{ order.user.email }} - π{{ order.total_amount }}</p>
+                                    <small>{{ order.created_at|timesince }} ago</small>
+                                </div>
+                                <span class="badge bg-{{ order.status }}">{{ order.get_status_display }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Recent Activities -->
-        <div class="col-12 col-lg-4 mb-4">
+        <div class="col-12 col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Recent Activities</h5>
+                    <h5 class="card-title mb-0">Wallet Verifications</h5>
                 </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for activity in recent_activities %}
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for wallet in pending_wallets %}
                         <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ activity.get_action_display }}</h6>
-                                <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ wallet.user.email }}</h6>
+                                    <small>Connected {{ wallet.connected_at|timesince }} ago</small>
+                                </div>
+                                <a href="{% url 'staff:pi_wallet_detail' wallet.id %}" class="btn btn-sm btn-primary">
+                                    Verify
+                                </a>
                             </div>
-                            <p class="mb-1">{{ activity.description }}</p>
-                            <small>by {{ activity.staff.user.get_full_name }}</small>
-                        </div>
-                        {% empty %}
-                        <div class="list-group-item">
-                            <p class="mb-0 text-muted">No recent activities</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -106,11 +142,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block staff_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Add any dashboard charts/graphs here
-</script>
 {% endblock %}

@@ -1,45 +1,41 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
 
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header">
-                    <h5 class="mb-0">Edit Profile</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        {% for field in form %}
-                            <div class="mb-3">
-                                {{ field.label_tag }}
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {{ field.errors|join:", " }}
-                                    </div>
-                                {% endif %}
-                                {% if field.help_text %}
-                                    <small class="form-text text-muted">
-                                        {{ field.help_text }}
-                                    </small>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'userauth:profile_view' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> Back
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                        </div>
-                    </form>
-                </div>
+<div class="page-container">
+    <div class="container" style="max-width: 768px;">
+        <div class="pi-card">
+            <div class="pi-card__header">
+                <h1 class="pi-card__title">Edit Profile</h1>
+            </div>
+            <div class="pi-card__body">
+                <form method="post" class="pi-form">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="form-group">
+                        <label class="info-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <span class="error-text">{{ field.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="button-group">
+                        <a href="{% url 'userauth:profile_view' %}" class="pi-button pi-button--outline">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="pi-button pi-button--primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

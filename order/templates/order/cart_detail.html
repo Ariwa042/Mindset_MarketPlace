@@ -4,163 +4,232 @@
 {% block title %}Your Cart - Pi Marketplace{% endblock %}
 
 {% block content %}
-<div class="cart-section">
-    <div class="container">
-        <h1 class="section-title">Your Cart</h1>
+<div class="cart-container">
+    <div class="container py-4">
+        <div class="cart-header">
+            <h1 class="cart-title">Shopping Cart</h1>
+            <span class="cart-count">{{ cart.get_total_items }} items</span>
+        </div>
+
         {% if cart.items.exists %}
-        <div class="cart-items">
-            {% for item in cart.items.all %}
-            <div class="cart-item" data-item-id="{{ item.id }}">
-                <div class="item-image">
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
-                </div>
-                <div class="item-details">
-                    <h3 class="item-title" title="{{ item.product.name }}">{{ item.product.name|truncatechars:30 }}</h3>
-                    <p class="item-price">π{{ item.product.price }}</p>
-                    <div class="item-actions">
-                        <div class="quantity-control">
-                            <button type="button" class="qty-btn minus"><i class="fas fa-minus"></i></button>
-                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="quantity-input" data-item-id="{{ item.id }}">
-                            <button type="button" class="qty-btn plus"><i class="fas fa-plus"></i></button>
+        <div class="cart-grid">
+            <div class="cart-items">
+                {% for item in cart.items.all %}
+                <div class="cart-item" data-item-id="{{ item.id }}">
+                    {% csrf_token %}
+                    <div class="item-image">
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="zoomable-image">
+                    </div>
+                    
+                    <div class="item-info">
+                        <h3 class="item-title">{{ item.product.name }}</h3>
+                        <p class="item-seller">Sold by: {{ item.product.seller.get_full_name }}</p>
+                        <div class="item-price">
+                            <span class="price-tag">π{{ item.product.price }}</span>
                         </div>
-                        <form method="post" action="{% url 'order:remove_from_cart' item.id %}" class="item-remove-form">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-remove"><i class="fas fa-trash-alt"></i> Remove</button>
-                        </form>
+                    </div>
+                    
+                    <div class="item-actions">
+                        <div class="quantity-controls">
+                            <button type="button" class="qty-btn minus" data-action="decrease">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" 
+                                   value="{{ item.quantity }}" 
+                                   min="1" 
+                                   max="{{ item.product.stock }}" 
+                                   class="quantity-input"
+                                   data-item-id="{{ item.id }}"
+                                   data-stock="{{ item.product.stock }}">
+                            <button type="button" class="qty-btn plus" data-action="increase">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <button type="button" class="remove-item" data-item-id="{{ item.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="item-total">
+                        <span class="total-label">Total:</span>
+                        <span class="total-amount">π{{ item.get_cost }}</span>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-        <div class="cart-summary">
-            <h2 class="summary-title">Order Summary</h2>
-            <p class="summary-item">Total Items: <span>{{ cart.get_total_items }}</span></p>
-            <p class="summary-item">Total Price: <span>π{{ cart.get_total_price }}</span></p>
-            <a href="{% url 'order:checkout' %}" class="btn-checkout">Proceed to Checkout</a>
+            
+            <div class="cart-summary">
+                <div class="summary-card">
+                    <h2>Order Summary</h2>
+                    <div class="summary-details">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>π{{ cart.get_total_price }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span>Free</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span>π{{ cart.get_total_price }}</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'order:checkout' %}" class="checkout-btn">
+                        Proceed to Checkout
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
         {% else %}
-        <p class="empty-cart">Your cart is empty.</p>
+        <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h2>Your cart is empty</h2>
+            <p>Browse our products and add items to your cart</p>
+            <a href="{% url 'product:product_list' %}" class="continue-shopping">
+                Continue Shopping
+            </a>
+        </div>
         {% endif %}
     </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
 <style>
-/* Cart Section Styles */
-.cart-section {
+.cart-container {
+    background: var(--pi-background);
+    min-height: calc(100vh - var(--header-height));
     padding: 2rem 0;
-    background: linear-gradient(to bottom, rgba(120, 58, 140, 0.05), transparent);
 }
 
-.section-title {
-    color: var(--pi-purple);
+.cart-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    color: #783a8c;
+}
+
+.cart-title {
     font-size: 2rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
-    text-align: center;
+    color: var(--pi-primary);
+    margin: 0;
+}
+
+.cart-count {
+    color: var(--pi-text-secondary);
+    font-size: 1.1rem;
+}
+
+.cart-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
 }
 
 .cart-items {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: 1rem;
 }
 
 .cart-item {
-    display: flex;
-    gap: 1rem;
     background: white;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-.cart-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem;
 }
 
 .item-image img {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
 }
 
-.item-details {
-    flex: 1;
+.item-image img:hover {
+    transform: scale(1.05);
+}
+
+.item-info {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 0.25rem;
 }
 
 .item-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 500;
-    color: var(--pi-purple);
-    margin-bottom: 0.5rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: var(--pi-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.item-seller {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0;
 }
 
 .item-price {
-    font-size: 1rem;
+    color: var(--pi-primary);
     font-weight: 600;
-    color: var(--pi-purple);
-    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .item-actions {
     display: flex;
-    gap: 0.5rem;
-}
-
-.item-quantity-form,
-.item-remove-form {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.quantity-control {
-    display: flex;
     align-items: center;
-    border: 1px solid var(--gray-300);
+    gap: 0.5rem;
+}
+
+.quantity-controls {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    overflow: hidden;
+    height: 32px;
 }
 
 .qty-btn {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: var(--pi-purple);
-    color: white;
-    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    color: var(--pi-primary);
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.qty-btn:hover {
-    background: var(--pi-purple-dark);
+.qty-btn:disabled {
+    color: var(--pi-text-secondary);
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
-.qty-btn.minus {
-    border-right: 1px solid var(--gray-300);
-}
-
-.qty-btn.plus {
-    border-left: 1px solid var(--gray-300);
+.qty-btn:not(:disabled):hover {
+    background: var(--pi-background);
 }
 
 .quantity-input {
-    width: 50px;
+    width: 40px;
+    height: 32px;
     text-align: center;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    font-size: 0.9rem;
     border: none;
     padding: 0.5rem;
     -moz-appearance: textfield;
@@ -172,94 +241,175 @@
     margin: 0;
 }
 
-.quantity-input {
-    width: 60px;
-    padding: 0.5rem;
-    border: 1px solid var(--gray-300);
-    border-radius: 4px;
-}
-
-.btn-update,
-.btn-remove {
-    background: var(--pi-purple);
-    color: white;
+.remove-item {
+    background: none;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    color: var(--pi-error);
     cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
     transition: all 0.3s ease;
 }
 
-.btn-update:hover,
-.btn-remove:hover {
-    background: var(--pi-purple-dark);
+.remove-item:hover {
+    background: rgba(239, 68, 68, 0.1);
 }
 
-.cart-summary {
+.item-total {
+    font-weight: 600;
+    color: var(--pi-primary);
+    white-space: nowrap;
+}
+
+.summary-card {
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    text-align: center;
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+    box-shadow: 0 2px 8px rgba(120, 58, 140, 0.1);
 }
 
-.summary-title {
-    font-size: 1.5rem;
+.summary-details {
+    margin: 1.5rem 0;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--pi-border);
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--pi-border);
     font-weight: 600;
-    color: var(--pi-purple);
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--pi-primary);
 }
 
-.summary-item {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--gray-600);
-    margin-bottom: 0.5rem;
-}
-
-.summary-item span {
-    font-weight: 600;
-    color: var(--pi-purple);
-}
-
-.btn-checkout {
-    display: inline-block;
+.checkout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
     background: var(--pi-purple);
     color: white;
-    padding: 0.75rem 2rem;
-    border-radius: 4px;
-    font-size: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    text-decoration: none;
     font-weight: 500;
     transition: all 0.3s ease;
-    margin-top: 1rem;
 }
 
-.btn-checkout:hover {
+.checkout-btn:hover {
     background: var(--pi-purple-dark);
+    transform: translateY(-2px);
+    color: white;
 }
 
 .empty-cart {
     text-align: center;
-    font-size: 1.2rem;
-    color: var(--gray-600);
+    padding: 4rem 0;
+}
+
+.empty-cart i {
+    font-size: 4rem;
+    color: var(--pi-text-secondary);
+    margin-bottom: 1rem;
+}
+
+.continue-shopping {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.75rem 2rem;
+    background: var(--pi-primary);
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.continue-shopping:hover {
+    background: var(--pi-primary-dark);
+    transform: translateY(-2px);
+    color: white;
+}
+
+@media (max-width: 992px) {
+    .cart-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-card {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .cart-item {
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+    }
+
+    .item-actions, .item-total {
+        grid-column: 2;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
-{% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Get CSRF token
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    function updateCart(itemId, quantity) {
-        fetch(`/order/cart/update/${itemId}/`, {
+    function updateCartItem(input) {
+        const itemId = input.dataset.itemId;
+        const quantity = input.value;
+        const cartItem = input.closest('.cart-item');
+
+        return fetch(`/order/cart/update/${itemId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ quantity: quantity })
+            credentials: 'same-origin',  // Add this line
+            body: JSON.stringify({ quantity: parseInt(quantity) })
         })
         .then(response => {
             if (!response.ok) {
@@ -268,70 +418,142 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            // Update item total cost
-            const cartItem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
-            if (cartItem) {
-                const totalCost = parseFloat(data.total_cost).toFixed(2);
-                cartItem.querySelector('.item-price').textContent = `π${totalCost}`;
-            }
-
-            // Update cart summary
-            const summaryItems = document.querySelectorAll('.summary-item span');
-            summaryItems[0].textContent = data.cart_items;
-            summaryItems[1].textContent = `π${data.cart_total}`;
-
-            // Update cart badge in header if it exists
-            const cartBadge = document.querySelector('.cart-badge');
-            if (cartBadge) {
-                cartBadge.textContent = data.cart_items;
+            if (data.status === 'success') {
+                // Update item total
+                cartItem.querySelector('.total-amount').textContent = `π${data.total_cost}`;
+                
+                // Update summary totals
+                document.querySelector('.summary-total span:last-child').textContent = `π${data.cart_total}`;
+                document.querySelector('.summary-row span:last-child').textContent = `π${data.cart_total}`;
+                document.querySelector('.cart-count').textContent = `${data.cart_items} items`;
+                
+                // Update cart badge in header
+                const cartBadge = document.querySelector('.cart-badge');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_items;
+                    cartBadge.style.display = data.cart_items > 0 ? 'flex' : 'none';
+                }
+            } else {
+                throw new Error(data.message || 'Error updating cart');
             }
         })
         .catch(error => {
             console.error('Error:', error);
+            alert('Error updating cart. Please try again.');
+            // Reset input to previous value
+            location.reload();
         });
     }
 
-    // Handle quantity input changes
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        const minValue = parseInt(input.min);
-        const maxValue = parseInt(input.max);
-        const itemId = input.dataset.itemId;
+    // Handle quantity changes
+    document.querySelectorAll('.quantity-controls').forEach(control => {
+        const input = control.querySelector('.quantity-input');
+        const minusBtn = control.querySelector('[data-action="decrease"]');
+        const plusBtn = control.querySelector('[data-action="increase"]');
+        const maxStock = parseInt(input.dataset.stock);
+        let isUpdating = false;
 
-        // Handle direct input
-        input.addEventListener('change', function() {
-            let value = parseInt(this.value);
-            if (value < minValue) value = minValue;
-            if (value > maxValue) value = maxValue;
-            this.value = value;
-            updateCart(itemId, value);
-        });
-
-        // Handle plus/minus buttons
-        const plusBtn = input.nextElementSibling;
-        const minusBtn = input.previousElementSibling;
-
-        plusBtn.addEventListener('click', () => {
+        minusBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent double trigger
+            if (isUpdating) return;
+            isUpdating = true;
+            
             let value = parseInt(input.value);
-            if (value < maxValue) {
-                input.value = value + 1;
-                updateCart(itemId, value + 1);
-            }
-        });
-
-        minusBtn.addEventListener('click', () => {
-            let value = parseInt(input.value);
-            if (value > minValue) {
+            if (value > 1) {
                 input.value = value - 1;
-                updateCart(itemId, value - 1);
+                updateCartItem(input).finally(() => {
+                    isUpdating = false;
+                });
+            }
+            updateButtonStates();
+        });
+
+        plusBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent double trigger
+            if (isUpdating) return;
+            isUpdating = true;
+            
+            let value = parseInt(input.value);
+            if (value < maxStock) {
+                input.value = value + 1;
+                updateCartItem(input).finally(() => {
+                    isUpdating = false;
+                });
+            }
+            updateButtonStates();
+        });
+
+        input.addEventListener('change', function(e) {
+            e.preventDefault(); // Prevent double trigger
+            let value = parseInt(input.value);
+            if (value < 1) input.value = 1;
+            if (value > maxStock) input.value = maxStock;
+            updateCartItem(input);
+            updateButtonStates();
+        });
+
+        function updateButtonStates() {
+            const currentValue = parseInt(input.value);
+            minusBtn.disabled = currentValue <= 1;
+            plusBtn.disabled = currentValue >= maxStock;
+        }
+
+        // Initial button states
+        updateButtonStates();
+    });
+
+    // Handle remove item
+    document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            if (confirm('Are you sure you want to remove this item?')) {
+                removeCartItem(itemId);
             }
         });
     });
 
-    function getCookie(name) {
-        let value = `; ${document.cookie}`;
-        let parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+    function removeCartItem(itemId) {
+        const cartItem = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+        
+        fetch(`/order/cart/remove/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'  // Add this line
+        })
+        .then(response => response.json())
+        .then(data => {
+            cartItem.style.animation = 'slideUp 0.3s reverse';
+            setTimeout(() => {
+                cartItem.remove();
+                if (data.total_items === 0) {
+                    location.reload();
+                } else {
+                    // Update totals
+                    document.querySelector('.summary-total span:last-child').textContent = `π${data.total_price}`;
+                    document.querySelector('.cart-count').textContent = `${data.total_items} items`;
+                    
+                    // Update cart badge
+                    const cartBadge = document.querySelector('.cart-badge');
+                    if (cartBadge) {
+                        if (data.total_items > 0) {
+                            cartBadge.textContent = data.total_items;
+                            cartBadge.style.display = 'flex';
+                        } else {
+                            cartBadge.style.display = 'none';
+                        }
+                    }
+                }
+            }, 300);
+        })
+        .catch(error => {
+            console.error('Error removing item:', error);
+            alert('Error removing item. Please try again.');
+        });
     }
 });
 </script>
+{% endblock %}
 {% endblock %}

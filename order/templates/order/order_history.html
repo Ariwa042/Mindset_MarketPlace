@@ -1,68 +1,325 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{% if order %}Order #{{ order.id|truncatechars:8 }}{% else %}Order History{% endif %} - Pi Marketplace
+{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/base.css' %}" rel="stylesheet">
+{% endblock %}
+
 
 {% block content %}
-<div class="container my-4">
-    <h2>Order History - #{{ order.id }}</h2>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Current Status: {{ order.get_status_display }}</h5>
-            {% if estimated_delivery %}
-            <p class="text-muted">Estimated Delivery: {{ estimated_delivery|date }}</p>
-            {% endif %}
-        </div>
-        
-        <div class="card-body">
-            <div class="timeline">
-                {% for history in status_history %}
-                <div class="timeline-item">
-                    <div class="timeline-date">
-                        {{ history.created_at|date:"M d, Y H:i" }}
-                    </div>
-                    <div class="timeline-content">
-                        <h6>Status changed to: {{ history.get_status_display }}</h6>
-                        {% if history.notes %}
-                        <p class="text-muted">{{ history.notes }}</p>
+<div class="order-history-container">
+    <div class="container py-4">
+        {% if order %}
+            <!-- Single Order View -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="order-title">Order #{{ order.id|truncatechars:8 }}</h1>
+                <a href="{% url 'order:order_list' %}" class="pi-button pi-button--outline">
+                    <i class="fas fa-arrow-left"></i> Back to Orders
+                </a>
+            </div>
+
+            <!-- Order Status Card -->
+            <div class="order-card status-card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5>Current Status: 
+                            <span class="badge bg-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </h5>
+                        {% if estimated_delivery %}
+                            <div class="delivery-estimate">
+                                <i class="fas fa-truck"></i>
+                                Estimated Delivery: {{ estimated_delivery|date }}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
-                {% endfor %}
+                
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for history in status_history %}
+                            <div class="timeline-item">
+                                <div class="timeline-icon bg-{{ history.status }}">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">{{ history.created_at|date:"M d, Y H:i" }}</div>
+                                    <h6>{{ history.get_status_display }}</h6>
+                                    {% if history.notes %}
+                                        <p>{{ history.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="card">
-        <div class="card-header">
-            <h5>Order Details</h5>
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in items %}
-                    <tr>
-                        <td>{{ item.product.name }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>${{ item.price }}</td>
-                        <td>${{ item.get_total_price }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="text-right"><strong>Total Amount:</strong></td>
-                        <td>${{ order.total_amount }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+
+            <!-- Order Details Card -->
+            <div class="order-card">
+                <div class="card-header">
+                    <h5>Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="order-items">
+                        {% for item in items %}
+                            <div class="order-item">
+                                <div class="item-image">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                </div>
+                                <div class="item-details">
+                                    <h6>{{ item.product.name }}</h6>
+                                    <p class="quantity">Quantity: {{ item.quantity }}</p>
+                                    <p class="price">π{{ item.price }} each</p>
+                                </div>
+                                <div class="item-total">
+                                    <p class="total-label">Total</p>
+                                    <p class="total-amount">π{{ item.get_total_price }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="order-total">
+                        <span>Total Amount:</span>
+                        <span>π{{ order.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Orders List View -->
+            <div class="order-summary-cards">
+                <div class="summary-card">
+                    <h3>{{ total_orders }}</h3>
+                    <p>Total Orders</p>
+                </div>
+                <div class="summary-card">
+                    <h3>{{ pending_orders }}</h3>
+                    <p>Pending</p>
+                </div>
+                <div class="summary-card">
+                    <h3>{{ completed_orders }}</h3>
+                    <p>Completed</p>
+                </div>
+            </div>
+
+            <div class="order-card">
+                <div class="card-header">
+                    <h5>Your Orders</h5>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                        <div class="orders-list">
+                            {% for order in orders %}
+                                <a href="{% url 'order:order_history' order.id %}" class="order-list-item">
+                                    <div class="order-basic-info">
+                                        <h6>Order #{{ order.id|truncatechars:8 }}</h6>
+                                        <p>{{ order.created_at|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div class="order-status">
+                                        <span class="badge bg-{{ order.status }}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="order-amount">
+                                        <p>π{{ order.total_amount }}</p>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No orders found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
+
+<style>
+.order-history-container {
+    background: var(--pi-background);
+    min-height: calc(100vh - var(--header-height));
+    padding: 2rem 0;
+}
+
+.order-title {
+    color: var(--pi-primary);
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.order-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(120, 58, 140, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.card-header {
+    background: white;
+    border-bottom: 2px solid rgba(120, 58, 140, 0.1);
+    padding: 1.25rem;
+}
+
+.card-header h5 {
+    color: var(--pi-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.timeline {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    position: relative;
+}
+
+.timeline-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 40px;
+    bottom: -10px;
+    width: 2px;
+    background: rgba(120, 58, 140, 0.1);
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-date {
+    color: var(--pi-text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.order-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--pi-background);
+}
+
+.item-image img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.item-details h6 {
+    margin: 0;
+    color: var(--pi-primary);
+}
+
+.order-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-top: 2px solid rgba(120, 58, 140, 0.1);
+    font-weight: 600;
+    color: var(--pi-primary);
+}
+
+.order-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(120, 58, 140, 0.1);
+}
+
+.summary-card h3 {
+    color: var(--pi-primary);
+    margin: 0;
+    font-size: 2rem;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.order-list-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    padding: 1rem;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.order-list-item:hover {
+    background: var(--pi-background);
+    transform: translateX(5px);
+}
+
+@media (max-width: 768px) {
+    .order-item {
+        grid-template-columns: auto 1fr;
+    }
+
+    .item-total {
+        grid-column: 1 / -1;
+        text-align: right;
+    }
+
+    .order-list-item {
+        grid-template-columns: 1fr auto;
+    }
+
+    .order-status {
+        grid-column: 1 / -1;
+        margin-top: 0.5rem;
+    }
+}
+</style>
 {% endblock %}

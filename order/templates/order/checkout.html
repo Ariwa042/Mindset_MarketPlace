@@ -63,20 +63,12 @@
                         {% else %}
                             <div class="wallet-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                {% if not wallet %}
-                                    <div class="wallet-message">
-                                        <h4>Wallet Not Connected</h4>
-                                        <p>Please connect your Pi Wallet to continue with checkout</p>
-                                        <button type="button" class="btn-wallet-action" id="connectWalletBtn">
-                                            Connect Wallet <i class="fas fa-plug"></i>
-                                        </button>
-                                    </div>
-                                {% elif not wallet.is_verified %}
+                                {% if not wallet.is_verified %}
                                     <div class="wallet-message">
                                         <h4>Wallet Not Verified</h4>
                                         <p>Please verify your wallet ownership to proceed</p>
                                         <button type="button" class="btn-wallet-action" id="verifyWalletBtn" onclick="window.location.href='{% url 'payment:connect_wallet' %}'">
-                                            Verify Wallet <i class="fas fa-shield-alt"></i>
+                                            Verify Wallet
                                         </button>
                                     </div>
                                 {% endif %}

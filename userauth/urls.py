@@ -12,6 +12,7 @@ urlpatterns = [
     # Email Verification URLs
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('resend-otp/', views.resend_otp, name='resend_otp'),
+    path('check-email/', views.check_email, name='check_email'),
     
     # Profile Management URLs
     path('profile/', views.profile_view, name='profile_view'),

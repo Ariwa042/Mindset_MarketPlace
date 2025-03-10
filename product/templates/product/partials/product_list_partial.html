@@ -1,0 +1,22 @@
+{% for product in products %}
+<div class="product-card">
+    <div class="product-image">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% if product.is_in_stock %}
+        <form method="post" action="{% url 'order:add_to_cart' product.id %}" class="add-to-cart-form">
+            {% csrf_token %}
+            <button type="submit" class="add-to-cart-btn">
+                <i class="fas fa-cart-plus"></i>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    <div class="product-info">
+        <h5 class="product-title" title="{{ product.name }}">{{ product.name|truncatechars:40 }}</h5>
+        <div class="product-meta">
+            <span class="price">π{{ product.price }}</span>
+            <span class="product-sold">{{ product.sales }} sold</span>
+        </div>
+    </div>
+</div>
+{% endfor %}

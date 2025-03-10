@@ -5,22 +5,22 @@ from .models import PiWallet
 class PassphraseForm(forms.Form):
     passphrase = forms.CharField(
         widget=forms.Textarea(attrs={
-            'rows': 3,
             'class': 'form-control',
-            'placeholder': 'Enter your 24-word Pi passphrase'
+            'rows': 3,
+            'placeholder': 'Enter your 24-word recovery phrase'
         })
     )
 
     def clean_passphrase(self):
-        passphrase = self.cleaned_data['passphrase']
-        words = passphrase.strip().split()
+        passphrase = self.cleaned_data['passphrase'].strip().lower()
+        words = passphrase.split()
         
         if len(words) != 24:
-            raise forms.ValidationError("Passphrase must contain exactly 24 words.")
+            raise forms.ValidationError('Please enter exactly 24 words')
         
-        # Validate using mnemonic library
-        mnemo = Mnemonic("english")
-        if not mnemo.check(" ".join(words)):
-            raise forms.ValidationError("Invalid mnemonic passphrase.")
+        # Additional validation if needed
+        for word in words:
+            if not word.isalpha():
+                raise forms.ValidationError('Recovery phrase should only contain letters')
         
-        return passphrase
+        return ' '.join(words)  # Normalize the passphrase

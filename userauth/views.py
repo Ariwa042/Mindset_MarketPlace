@@ -5,60 +5,73 @@ from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm, SignInForm, OTPVerificationForm, ProfileUpdateForm
 from datetime import datetime, timedelta
 from .utils import send_otp_email
-from .models import OTP
+from .models import OTP, CustomUser  # Add CustomUser import
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.http import JsonResponse
+import random  # Add this for OTP generation
 
 
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False  # User won't be able to login until email is verified
-            user.save()
+            email = form.cleaned_data['email']
+            # Store form data in session
+            request.session['signup_data'] = {
+                'email': email,
+                'password1': form.cleaned_data['password1'],
+                'password2': form.cleaned_data['password2']
+            }
             
-            # Send OTP
-            send_otp_email(user)
-            
-            # Store user_id in session for verification
-            request.session['user_id'] = user.id
-            return redirect('verify_otp')
-            
+            try:
+                send_otp_email(email)
+                messages.success(request, 'OTP sent to your email.')
+                return redirect('userauth:verify_otp')
+            except Exception as e:
+                messages.error(request, 'Error sending OTP. Please try again.')
+                return redirect('userauth:signup')
     else:
         form = SignUpForm()
     return render(request, 'userauth/signup.html', {'form': form})
 
 def verify_otp(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        messages.error(request, 'Please sign up first.')
-        return redirect('signup')
+    signup_data = request.session.get('signup_data')
+    if not signup_data:
+        messages.error(request, 'Please complete signup form first.')
+        return redirect('userauth:signup')
         
     if request.method == 'POST':
         form = OTPVerificationForm(request.POST)
         if form.is_valid():
             otp = form.cleaned_data['otp']
+            email = signup_data['email']
+            
             try:
+                # Verify OTP
                 otp_obj = OTP.objects.filter(
-                    user_id=user_id,
+                    email=email,
                     otp=otp,
                     expires_at__gt=timezone.now()
                 ).latest('created_at')
                 
-                # Activate user
-                user = otp_obj.user
+                # Create user account - username will be automatically generated
+                user = CustomUser.objects.create_user(
+                    email=signup_data['email'],
+                    password=signup_data['password1']
+                )
                 user.is_active = True
                 user.save()
                 
-                # Delete used OTP
+                # Delete used OTP and session data
                 otp_obj.delete()
+                del request.session['signup_data']
                 
                 # Log user in
                 login(request, user)
-                messages.success(request, 'Email verified successfully!')
-                return redirect('home')
+                messages.success(request, 'Account created successfully!')
+                return redirect('core:home')
                 
             except OTP.DoesNotExist:
                 messages.error(request, 'Invalid or expired OTP.')
@@ -68,15 +81,47 @@ def verify_otp(request):
     return render(request, 'userauth/verify_otp.html', {'form': form})
 
 def resend_otp(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        messages.error(request, 'Please sign up first.')
-        return redirect('signup')
+    signup_data = request.session.get('signup_data')
+    if not signup_data:
+        messages.error(request, 'Please complete signup form first.')
+        return redirect('userauth:signup')
         
-    user = CustomUser.objects.get(id=user_id)
-    send_otp_email(user)
-    messages.success(request, 'New OTP has been sent to your email.')
-    return redirect('verify_otp')
+    try:
+        send_otp_email(signup_data['email'])
+        messages.success(request, 'New OTP has been sent to your email.')
+    except Exception as e:
+        messages.error(request, 'Error sending OTP. Please try again.')
+    
+    return redirect('userauth:verify_otp')
+
+def send_otp_email(email):
+    """Generate and send OTP"""
+    from .utils import generate_otp, send_otp_email as send_email
+    
+    otp = generate_otp()
+    expires_at = timezone.now() + timedelta(minutes=10)
+    
+    try:
+        # Delete any existing OTPs for this email
+        OTP.objects.filter(email=email).delete()
+        
+        # Create new OTP record
+        otp_obj = OTP.objects.create(
+            email=email,
+            otp=otp,
+            expires_at=expires_at
+        )
+        
+        # Send email
+        if send_email(email, otp):
+            return True
+        else:
+            otp_obj.delete()
+            raise Exception("Failed to send OTP email")
+            
+    except Exception as e:
+        print(f"Error in send_otp_email: {str(e)}")  # Debugging
+        raise
 
 def signin(request):
     if request.method == 'POST':
@@ -215,3 +260,9 @@ def verify_reset_otp(request):
             messages.error(request, 'Invalid or expired OTP.')
             
     return render(request, 'userauth/verify_reset_otp.html')
+
+def check_email(request):
+    """AJAX endpoint to check if email exists"""
+    email = request.GET.get('email', '')
+    exists = CustomUser.objects.filter(email=email).exists()
+    return JsonResponse({'exists': exists})

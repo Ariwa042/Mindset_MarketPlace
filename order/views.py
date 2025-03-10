@@ -2,11 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
+import json  # Add this import
 from .models import Cart, CartItem, Order, OrderItem
 from product.models import Product
 from payment.models import PiWallet
 
 @login_required
+@ensure_csrf_cookie
 def cart_detail(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
     return render(request, 'order/cart_detail.html', {'cart': cart})
@@ -50,29 +53,38 @@ def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     
     try:
-        if request.method == 'POST':
-            if request.content_type == 'application/json':
-                import json
-                data = json.loads(request.body)
-                quantity = int(data.get('quantity', 1))
-            else:
-                quantity = int(request.POST.get('quantity', 1))
-
+        if request.method == 'POST' and request.content_type == 'application/json':
+            data = json.loads(request.body)
+            quantity = int(data.get('quantity', 1))
+            
             if quantity > 0 and quantity <= cart_item.product.stock:
                 cart_item.quantity = quantity
                 cart_item.save()
-
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    cart = cart_item.cart
-                    return JsonResponse({
-                        'total_cost': str(cart_item.get_cost()),
-                        'cart_total': str(cart.get_total_price()),
-                        'cart_items': cart.get_total_items(),
-                    })
-    except (ValueError, json.JSONDecodeError):
-        pass
+                cart = cart_item.cart
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Cart updated successfully',
+                    'total_cost': str(cart_item.get_cost()),
+                    'cart_total': str(cart.get_total_price()),
+                    'cart_items': cart.get_total_items(),
+                })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid quantity'
+                }, status=400)
+                
+    except (ValueError, json.JSONDecodeError) as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
     
-    return redirect('order:cart_detail')
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request'
+    }, status=400)
 
 @login_required
 def checkout(request):
@@ -122,15 +134,27 @@ def order_detail(request, order_id):
     return render(request, 'order/order_detail.html', {'order': order})
 
 @login_required
-def order_history(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    status_history = order.get_status_history()
-    estimated_delivery = order.get_estimated_delivery()
+def order_history(request, order_id=None):
+    """Combined view for order list and detail history"""
+    if order_id:
+        # Show single order history
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        context = {
+            'order': order,
+            'status_history': order.get_status_history(),
+            'estimated_delivery': order.get_estimated_delivery(),
+            'items': order.items.all().select_related('product')
+        }
+    else:
+        # Show all orders
+        orders = Order.objects.filter(user=request.user).prefetch_related(
+            'items', 'status_history'
+        ).order_by('-created_at')
+        context = {
+            'orders': orders,
+            'total_orders': orders.count(),
+            'pending_orders': orders.filter(status='pending').count(),
+            'completed_orders': orders.filter(status='delivered').count()
+        }
     
-    context = {
-        'order': order,
-        'status_history': status_history,
-        'estimated_delivery': estimated_delivery,
-        'items': order.items.all().select_related('product')
-    }
     return render(request, 'order/order_history.html', context)

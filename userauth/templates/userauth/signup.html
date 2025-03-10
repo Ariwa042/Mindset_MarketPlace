@@ -49,3 +49,91 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.auth-form');
+    const emailInput = form.querySelector('input[type="email"]');
+    const passwordInput = form.querySelector('input[name="password1"]');
+    const confirmPasswordInput = form.querySelector('input[name="password2"]');
+
+    function showError(input, message) {
+        const feedback = input.nextElementSibling || document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.textContent = message;
+        if (!input.nextElementSibling) {
+            input.parentNode.appendChild(feedback);
+        }
+        input.classList.add('is-invalid');
+        feedback.classList.add('show');
+    }
+
+    function clearError(input) {
+        const feedback = input.nextElementSibling;
+        if (feedback && feedback.classList.contains('invalid-feedback')) {
+            input.classList.remove('is-invalid');
+            feedback.classList.remove('show');
+        }
+    }
+
+    // Email validation
+    emailInput.addEventListener('blur', async function() {
+        clearError(this);
+        if (!this.value) {
+            showError(this, 'Email is required');
+            return;
+        }
+        if (!/^\S+@\S+\.\S+$/.test(this.value)) {
+            showError(this, 'Please enter a valid email address');
+            return;
+        }
+
+        // Check if email already exists
+        try {
+            const response = await fetch('/user/check-email/?email=' + encodeURIComponent(this.value));
+            const data = await response.json();
+            if (data.exists) {
+                showError(this, 'This email is already registered');
+            }
+        } catch (error) {
+            console.error('Error checking email:', error);
+        }
+    });
+
+    // Password validation
+    passwordInput.addEventListener('input', function() {
+        clearError(this);
+        if (this.value.length < 8) {
+            showError(this, 'Password must be at least 8 characters long');
+        }
+    });
+
+    // Confirm password validation
+    confirmPasswordInput.addEventListener('input', function() {
+        clearError(this);
+        if (this.value !== passwordInput.value) {
+            showError(this, 'Passwords do not match');
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let hasError = false;
+        
+        // Trigger all validations
+        [emailInput, passwordInput, confirmPasswordInput].forEach(input => {
+            const event = input === emailInput ? new Event('blur') : new Event('input');
+            input.dispatchEvent(event);
+            if (input.classList.contains('is-invalid')) {
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

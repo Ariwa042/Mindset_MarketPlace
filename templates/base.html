@@ -13,69 +13,209 @@
     {% if 'userauth' in request.resolver_match.app_name %}
     <link href="{% static 'css/auth.css' %}" rel="stylesheet">
     {% endif %}
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}
+    <style>
+        /* Add these styles to the existing CSS */
+        .navbar .container {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-search {
+            justify-self: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            background: white;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .search-input:focus::placeholder {
+            color: var(--gray-400);
+        }
+
+        .search-box:focus-within .search-input {
+            color: var(--pi-purple);
+        }
+
+        .btn-search {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within .btn-search {
+            color: var(--pi-purple);
+        }
+
+        @media (max-width: 992px) {
+            .navbar .container {
+                grid-template-columns: auto auto;
+            }
+
+            .navbar-search {
+                display: none;
+            }
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-toggle {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: white;
+            min-width: 180px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .profile-dropdown.active .profile-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--pi-text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-item:hover {
+            background: rgba(120, 58, 140, 0.05);
+            color: var(--pi-purple);
+        }
+
+        .dropdown-divider {
+            margin: 0;
+            border-top: 1px solid rgba(120, 58, 140, 0.1);
+        }
+    </style>
+    {% endblock %}
 </head>
 <body>
+    {% block header %}
     <!-- Header -->
     <header class="header">
-        <nav class="navbar navbar-expand-lg fixed-top">
-            <div class="container">
+        <nav class="navbar">
+            <div class="navbar-container">
                 <!-- Logo -->
-                <a class="navbar-brand" href="{% url 'core:home' %}">
-                    <img src="{% static 'images/logo.webp' %}" alt="Pi Marketplace" height="35">
+                <a class="nav-brand" href="{% url 'core:home' %}">
+                    <img src="{% static 'images/logo.webp' %}" alt="Pi Marketplace">
                 </a>
 
-                <!-- Search Icon -->
+                <!-- Search Toggle Button -->
                 <button class="search-toggle d-lg-none" type="button">
                     <i class="fas fa-search"></i>
                 </button>
 
-                <!-- Right Navigation -->
-                <div class="nav-right">
-                    {% if user.is_authenticated %}
-                    <div class="profile-dropdown">
-                        <button class="nav-icon profile-toggle">
-                            <i class="fas fa-user"></i>
-                        </button>
-                        <div class="profile-menu">
-                            <a href="{% url 'userauth:profile_view' %}" class="profile-item">
-                                <i class="fas fa-user-circle"></i>
-                                View Profile
-                            </a>
-                            <a href="{% url 'userauth:signout' %}" class="profile-item">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Sign Out
-                            </a>
+                <!-- Search Bar -->
+                <div class="navbar-search">
+                    <form action="{% url 'product:search_products' %}" method="GET">
+                        <div class="search-box">
+                            <input type="search" name="q" placeholder="Search for products..." class="search-input" autocomplete="off">
+                            <button type="submit" class="btn-search">
+                                <i class="fas fa-search"></i>
+                            </button>
                         </div>
-                    </div>
+                    </form>
+                </div>
+
+                <!-- Right Navigation -->
+                <div class="nav-actions">
+                    {% if user.is_authenticated %}
+                        <div class="profile-dropdown">
+                            <button type="button" class="profile-toggle nav-link" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <div class="profile-menu">
+                                <a href="{% url 'userauth:profile_view' %}" class="profile-item">
+                                    <i class="fas fa-user-circle"></i>
+                                    My Profile
+                                </a>
+                                <hr class="dropdown-divider">
+                                <a href="{% url 'userauth:signout' %}" class="profile-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </a>
+                            </div>
+                        </div>
+                        <a href="{% url 'order:cart_detail' %}" class="nav-link nav-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            {% with cart_count=request.user.cart.get_total_items %}
+                            {% if cart_count > 0 %}
+                            <span class="cart-badge">{{ cart_count }}</span>
+                            {% endif %}
+                            {% endwith %}
+                        </a>
                     {% else %}
-                    <a href="{% url 'userauth:signin' %}" class="nav-icon">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </a>
+                        <a href="{% url 'userauth:signin' %}" class="nav-link">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Sign In</span>
+                        </a>
                     {% endif %}
-                    <a href="{% url 'order:cart_detail' %}" class="nav-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-badge">{{ request.user.cart.get_total_items|default:'0' }}</span>
-                    </a>
                 </div>
             </div>
         </nav>
     </header>
-
-    <!-- Search Overlay -->
-    <div class="search-overlay">
-        <div class="search-overlay-content">
-            <form action="{% url 'product:search_products' %}" method="GET">
-                <div class="search-box">
-                    <input type="search" name="q" placeholder="Search products..." class="form-control">
-                    <button type="submit" class="btn-search">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    {% endblock %}
     <!-- Main Content -->
     <main class="main-content">
         {% if messages %}
@@ -152,6 +292,148 @@
                         closeButton.click();
                     }
                 }, 3000);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchToggle = document.querySelector('.search-toggle');
+            const searchBar = document.querySelector('.navbar-search');
+            
+            searchToggle?.addEventListener('click', function() {
+                searchBar.classList.toggle('active');
+                if (searchBar.classList.contains('active')) {
+                    searchBar.querySelector('input').focus();
+                }
+            });
+
+            // Close search bar when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.navbar-search') && !e.target.closest('.search-toggle')) {
+                    searchBar.classList.remove('active');
+                }
+            });
+        });
+
+        // Image Modal Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create modal element
+            const modal = document.createElement('div');
+            modal.className = 'image-modal';
+            modal.innerHTML = `
+                <div class="modal-image-container">
+                    <img class="modal-image" src="" alt="">
+                    <button class="modal-close" aria-label="Close image">×</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Handle image clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('.zoomable-image')) {
+                    const img = e.target;
+                    const modalImg = modal.querySelector('.modal-image');
+                    modalImg.src = img.src;
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+
+            // Close modal when clicking outside image
+            modal.addEventListener('click', function(e) {
+                if (!e.target.matches('.modal-image')) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Handle touch events for zoom
+            let currentScale = 1;
+            let startDistance = 0;
+
+            modal.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    startDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                }
+            });
+
+            modal.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    
+                    const scale = currentScale * (currentDistance / startDistance);
+                    const img = modal.querySelector('.modal-image');
+                    
+                    // Limit zoom range
+                    if (scale >= 1 && scale <= 4) {
+                        img.style.transform = `scale(${scale})`;
+                    }
+                }
+            });
+
+            modal.addEventListener('touchend', function() {
+                const img = modal.querySelector('.modal-image');
+                currentScale = parseFloat(getComputedStyle(img).transform.split(',')[3]) || 1;
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile Dropdown Toggle
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const profileToggle = document.querySelector('.profile-toggle');
+
+            if (profileToggle) {
+                profileToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!profileDropdown.contains(e.target)) {
+                        profileDropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Replace existing profile dropdown code with this:
+            const profileDropdowns = document.querySelectorAll('.profile-dropdown');
+            
+            profileDropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('.profile-toggle');
+                
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Close other dropdowns
+                    profileDropdowns.forEach(other => {
+                        if (other !== dropdown) {
+                            other.classList.remove('active');
+                        }
+                    });
+                    
+                    dropdown.classList.toggle('active');
+                    toggle.setAttribute('aria-expanded', dropdown.classList.contains('active'));
+                });
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.profile-dropdown')) {
+                    profileDropdowns.forEach(dropdown => {
+                        dropdown.classList.remove('active');
+                        dropdown.querySelector('.profile-toggle').setAttribute('aria-expanded', 'false');
+                    });
+                }
             });
         });
     </script>

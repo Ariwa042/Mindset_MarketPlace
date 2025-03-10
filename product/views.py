@@ -78,21 +78,16 @@ def search_products(request):
     
     if query:
         products = products.filter(
-            Q(name__icontains(query)) |
-            Q(description__icontains(query)) |
-            Q(meta_keywords__icontains(query)) |
-            Q(subcategory__name__icontains(query)) |
-            Q(subcategory__category__name__icontains(query))
+            Q(name__icontains=query) |  # Fixed: removed parentheses
+            Q(description__icontains=query) |
+            Q(meta_keywords__icontains=query) |
+            Q(subcategory__name__icontains=query) |
+            Q(subcategory__category__name__icontains=query)
         ).distinct()
-    
-    # Pagination
-    paginator = Paginator(products, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
     
     context = {
         'query': query,
-        'page_obj': page_obj,
+        'products': products,  # Changed from page_obj since we're not using pagination here
     }
     return render(request, 'product/search_results.html', context)
 
