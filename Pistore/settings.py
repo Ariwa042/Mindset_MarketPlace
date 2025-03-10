@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-a)+v_7^v67f-i#z!zy)-k4hb#ifjm37_t3t57h_ru(8^u&@umi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'pi-marketplace-ycrb.onrender.com']
 
 AUTH_USER_MODEL = 'userauth.CustomUser'
 
@@ -162,4 +162,4 @@ DEFAULT_FROM_EMAIL = 'Pi Marketplace <piphrase042@gmail.com>'
 # Add CSRF settings
 CSRF_COOKIE_SECURE = True  # for HTTPS
 CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']  # Update with your domain
+CSRF_TRUSTED_ORIGINS = ['https://pi-marketplace-ycrb.onrender.com']  # Update with your domain
