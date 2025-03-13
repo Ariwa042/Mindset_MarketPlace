@@ -317,6 +317,11 @@ button.btn.btn-primary:hover {
     margin-bottom: 0.5rem;
     display: block;
 }
+.d-flex.justify-content-between.align-items-center.mb-4 {
+    align-items: start;
+    display: inline-block;
+    flex-direction: row;
+}
 
 .info-value {
     color: var(--pi-text-primary);
