@@ -3,137 +3,7 @@
     padding-top: 1rem;
 }
 
-/* Category Navigation */
-.category-nav {
-    position: relative;
-    z-index: 100;
-    background: white;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--gray-200);
-    width: 100%;
-    overflow: visible; /* Changed from overflow-x: scroll */
-}
-
-.category-nav.sticky-top {
-    position: sticky;
-    top: var(--header-height);
-}
-
-.categories-wrapper {
-    position: relative;
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.categories-container {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding-bottom: 1rem; /* Space for dropdown shadow */
-    margin-bottom: -1rem; /* Compensate for padding */
-}
-
-.categories-container::-webkit-scrollbar {
-    display: none;
-}
-
-.categories {
-    display: flex;
-    gap: 1.5rem;
-    padding: 0 1rem;
-    min-width: min-content; /* Ensures proper scroll width */
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-}
-
-.categories::-webkit-scrollbar {
-    display: none;
-}
-
-/* Category Items */
-.category-group {
-    position: relative;
-    display: inline-block;
-    white-space: nowrap;
-}
-
-.category-item {
-    color: var(--gray-600);
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.category-item:hover {
-    color: var(--pi-purple);
-    background: var(--gray-100);
-}
-
-.category-item.active {
-    color: var(--pi-purple);
-    background: var(--gray-100);
-}
-
-.category-item.has-dropdown {
-    padding-right: 2rem;
-    position: relative;
-}
-
-.dropdown-icon {
-    position: absolute;
-    right: 0.75rem;
-    transition: transform 0.3s ease;
-}
-
-.dropdown-icon.rotate {
-    transform: rotate(180deg);
-}
-
-/* Subcategories Dropdown */
-.subcategories-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 200px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: all 0.2s ease;
-    z-index: 1000;
-    margin-top: 0.5rem;
-}
-
-.subcategories-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.subcategory-item {
-    padding: 0.75rem 1rem;
-    color: var(--gray-600);
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.subcategory-item:hover {
-    color: var(--pi-purple);
-    background: var(--gray-100);
-}
+/* Remove any category navigation related styles to avoid conflicts */
 
 /* Filter Toggle */
 .filter-toggle {
@@ -321,7 +191,7 @@
     overflow: hidden;
 }
 .category-nav.mb-4 {
-    margin-bottom: 0px !important;
+    margin-bottom: 4px !important;
 }
 .price {
     font-size: 1.1rem;

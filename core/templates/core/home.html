@@ -104,13 +104,30 @@ $(document).ready(function() {
     $('.category-item.has-dropdown').click(function(e) {
         e.stopPropagation();
         const dropdown = $(this).siblings('.subcategories-menu');
+        const isOpen = dropdown.hasClass('show');
         
         // Close other dropdowns
-        $('.subcategories-menu').not(dropdown).removeClass('show');
-        dropdown.toggleClass('show');
+        $('.subcategories-menu').removeClass('show');
+        $('.dropdown-icon').removeClass('rotate');
         
-        // Toggle the dropdown icon
-        $(this).find('.dropdown-icon').toggleClass('rotate');
+        if (!isOpen) {
+            // Positioning strategy based on viewport width
+            if (window.innerWidth > 768) {
+                // For desktop: Position relative to the parent item
+                dropdown.addClass('show');
+            } else {
+                // For mobile: Position fixed with calculated offset
+                const rect = this.getBoundingClientRect();
+                dropdown.css({
+                    'top': (rect.bottom + 5) + 'px',
+                    'left': '10px',
+                    'right': '10px',
+                    'width': 'auto'
+                }).addClass('show');
+            }
+            
+            $(this).find('.dropdown-icon').addClass('rotate');
+        }
     });
 
     // Subcategory click handling
@@ -138,6 +155,22 @@ $(document).ready(function() {
         }
     });
 
+    // Close dropdowns when scrolling the category nav with improved debounce
+    let scrollTimeout;
+    $('.category-nav').on('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function() {
+            $('.subcategories-menu').removeClass('show');
+            $('.dropdown-icon').removeClass('rotate');
+        }, 150);
+    });
+
+    // Close dropdowns on window resize
+    $(window).on('resize', function() {
+        $('.subcategories-menu').removeClass('show');
+        $('.dropdown-icon').removeClass('rotate');
+    });
+
     function filterProducts(category, subcategory) {
         $.ajax({
             url: '{% url "product:filter_products" %}',
@@ -151,19 +184,15 @@ $(document).ready(function() {
         });
     }
 
-    // Add to cart function
-    
-
     function getCookie(name) {
         let value = `; ${document.cookie}`;
         let parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
-
-    function showToast(message) {
-        // Implement your toast notification here
-    }
 });
+    // Add to cart function
+    
+
 </script>
 {{ block.super }}
 <script>
