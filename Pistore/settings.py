@@ -26,13 +26,14 @@ SECRET_KEY = 'django-insecure-a)+v_7^v67f-i#z!zy)-k4hb#ifjm37_t3t57h_ru(8^u&@umi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'pi-marketplace-ycrb.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'userauth.CustomUser'
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # Add this at the very top
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,11 +46,11 @@ INSTALLED_APPS = [
     'order',
     'staff',
     'payment',
+    'compressor',  # Add this at the bottom
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',  # Ensure this is present
@@ -132,9 +133,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -153,17 +151,117 @@ LOGOUT_REDIRECT_URL = 'home'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-# Email Configuration - Use console backend for testing
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Change this for production
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'piphrase042@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'gpax zbei vpyk mspr'  # Replace with your app password
-DEFAULT_FROM_EMAIL = 'Pi Marketplace <piphrase042@gmail.com>'
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+#DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Add CSRF settings
 CSRF_COOKIE_SECURE = True  # for HTTPS
 CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ['https://pi-marketplace-ycrb.onrender.com']  # Update with your domain
+
+
+CSRF_TRUSTED_ORIGINS = ['https://yoursite.com']  # Update with your domain# Add CSRF settings
+CSRF_COOKIE_SECURE = True  # for HTTPS
+CSRF_COOKIE_HTTPONLY = True
+CSRF_TRUSTED_ORIGINS = ['https://yoursite.com']  # Update with your domain
+
+# Django Compressor Settings
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
+
+COMPRESS_ENABLED = True
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.rCSSMinFilter',
+]
+COMPRESS_JS_FILTERS = [
+    'compressor.filters.jsmin.JSMinFilter',
+]
+COMPRESS_OFFLINE = True
+COMPRESS_OUTPUT_DIR = 'compressed'
+
+# Jazzmin Settings
+JAZZMIN_SETTINGS = {
+    "site_title": "Pi Store Admin",
+    "site_header": "Pi Store",
+    "site_brand": "Pi Store",
+    "welcome_sign": "Welcome to Pi Store Admin Panel",
+    "copyright": "Pi Store",
+    "search_model": ["auth.User", "product.Product"],
+    
+    # Top Menu Items
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "/", "new_window": True},
+    ],
+    
+    # UI Customizer
+    "show_ui_builder": True,
+    
+    # Custom Icons
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "product.Product": "fas fa-shopping-cart",
+        "order.Order": "fas fa-file-invoice-dollar",
+        "payment.PiWallet": "fas fa-wallet",
+    },
+    
+    # Custom CSS/JS
+    "custom_css": None,
+    "custom_js": None,
+    
+    # Theme
+    "dark_mode_theme": "darkly",
+    
+    # Related Modal
+    "related_modal_active": True,
+    
+    # UI Tweaks
+    "show_ui_builder": True,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs",
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-purple",
+    "accent": "accent-purple",
+    "navbar": "navbar-purple navbar-dark",
+    "no_navbar_border": True,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-purple",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}

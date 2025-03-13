@@ -1,7 +1,8 @@
 # Core Django
-Django==5.1.3
+Django==4.2
 python-decouple==3.8
 Pillow==10.2.0
+jazzmin
 
 # Authentication & Security
 django-allauth==0.61.1

@@ -1,102 +1,115 @@
 {% extends 'staff/base.html' %}
+{% load static %}
 
-{% block staff_content %}
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title mb-0">Pi Wallet Details</h4>
-        <span class="badge bg-{{ wallet.is_verified|yesno:'success,warning' }}">
-            {{ wallet.is_verified|yesno:'Verified,Pending' }}
-        </span>
+{% block title %}Wallet Details - Staff Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Page Header -->
+    <div class="mb-3">
+        <h1 class="h3 d-inline align-middle">Wallet Details</h1>
+        <a href="{% url 'staff:pi_wallet_list' %}" class="btn btn-outline-secondary float-end">
+            <i class="fas fa-arrow-left"></i> Back to Wallets
+        </a>
     </div>
-    <div class="card-body">
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <h5 class="mb-3">User Information</h5>
-                <p><strong>Email:</strong> {{ wallet.user.email }}</p>
-                <p><strong>Name:</strong> {{ wallet.user.get_full_name }}</p>
-                <p><strong>Connected At:</strong> {{ wallet.connected_at|date:"M d, Y H:i" }}</p>
-            </div>
-            <div class="col-md-6">
-                <h5 class="mb-3">Pi Passphrase</h5>
-                <div class="position-relative">
-                    <div class="bg-light p-3 rounded mb-2">
-                        <pre class="mb-0"><code id="passphrase">{{ wallet.passphrase }}</code></pre>
-                        <button class="btn btn-sm btn-outline-primary position-absolute top-0 end-0 m-2" 
-                                onclick="copyPassphrase()" title="Copy passphrase">
-                            <i class="fas fa-copy"></i>
-                        </button>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <!-- Total Transactions Card -->
+
+        <!-- Total Volume Card -->
+        
+        <!-- Status Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Status</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat {% if wallet.is_verified %}text-success{% else %}text-warning{% endif %}">
+                                <i class="fas {% if wallet.is_verified %}fa-check-circle{% else %}fa-clock{% endif %}"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div id="copyAlert" class="alert alert-success d-none">
-                        Passphrase copied to clipboard!
+                    <div class="mt-1 mb-0">
+                        {% if wallet.is_verified %}
+                            <span class="badge bg-success">Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                        <p class="text-muted mt-1">Connected {{ wallet.connected_at|timesince }} ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Wallet Info -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Wallet Information</h5>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="toggle_verification">
+                        <button type="submit" class="btn {% if wallet.is_verified %}btn-warning{% else %}btn-success{% endif %} btn-sm">
+                            <i class="fas {% if wallet.is_verified %}fa-ban{% else %}fa-check{% endif %}"></i>
+                            {% if wallet.is_verified %}Revoke Verification{% else %}Verify Wallet{% endif %}
+                        </button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted small">Owner</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle text-muted me-2"></i>
+                                    <div>
+                                        <div>{{ wallet.user.get_full_name }}</div>
+                                        <div class="small text-muted">{{ wallet.user.email }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted small">Wallet Address</label>
+                                <div class="input-group">
+                                    <code class="form-control bg-light">{{ wallet.passphrase }}</code>
+                                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('{{ wallet.address }}')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="mb-4">
-            <form method="post" class="d-inline">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="toggle_verification">
-                <button type="submit" class="btn btn-{{ wallet.is_verified|yesno:'warning,success' }}">
-                    {{ wallet.is_verified|yesno:'Unverify,Verify' }} Wallet
-                </button>
-            </form>
-        </div>
-
-        <!-- Recent Transactions section -->
-        <h5 class="mb-3">Recent Transactions</h5>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in transactions %}
-                    <tr>
-                        <td>{{ transaction.order.id|truncatechars:8 }}</td>
-                        <td>π{{ transaction.amount }}</td>
-                        <td>
-                            <span class="badge bg-{{ transaction.status }}">
-                                {{ transaction.get_status_display }}
-                            </span>
-                        </td>
-                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
-                        <td>
-                            <a href="{% url 'staff:pi_transaction_detail' transaction.pk %}" 
-                               class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">No transactions found</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <!-- Transaction History -->
     </div>
 </div>
-{% endblock %}
 
-{% block staff_js %}
+{% block extra_js %}
 <script>
-function copyPassphrase() {
-    const passphrase = document.getElementById('passphrase').innerText;
-    navigator.clipboard.writeText(passphrase).then(() => {
-        const alert = document.getElementById('copyAlert');
-        alert.classList.remove('d-none');
-        setTimeout(() => {
-            alert.classList.add('d-none');
-        }, 3000);
-    });
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            const button = event.target.closest('button');
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+            }, 2000);
+        })
+        .catch(err => console.error('Failed to copy:', err));
 }
 </script>
+{% endblock %}
 {% endblock %}

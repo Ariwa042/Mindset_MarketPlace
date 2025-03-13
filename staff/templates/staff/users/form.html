@@ -1,55 +1,149 @@
 {% extends 'staff/base.html' %}
 
-{% block staff_content %}
-<div class="card">
-    <div class="card-header">
-        <h4 class="card-title mb-0">{% if user_obj %}Edit{% else %}Create{% endif %} User</h4>
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col">
+            <h1 class="h3 mb-0">{% if user_obj %}Edit User{% else %}Create User{% endif %}</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'staff:user_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
     </div>
-    <div class="card-body">
-        <form method="post" class="needs-validation" novalidate>
-            {% csrf_token %}
-            
-            <div class="row">
+
+    <!-- User Form Card -->
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
                 <!-- User Information -->
-                <div class="col-md-6">
-                    <h5 class="mb-3">User Information</h5>
-                    {% for field in user_form %}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="card-title mb-4">User Information</h5>
+                        
                         <div class="mb-3">
-                            {{ field.label_tag }}
-                            {{ field }}
-                            {% if field.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ field.errors|join:", " }}
-                                </div>
+                            <label class="form-label">Email Address</label>
+                            {{ user_form.email }}
+                            {% if user_form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ user_form.email.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
-                    {% endfor %}
-                </div>
 
-                <!-- Profile Information -->
-                <div class="col-md-6">
-                    <h5 class="mb-3">Profile Information</h5>
-                    {% for field in profile_form %}
-                        <div class="mb-3">
-                            {{ field.label_tag }}
-                            {{ field }}
-                            {% if field.errors %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
                                 <div class="invalid-feedback d-block">
-                                    {{ field.errors|join:", " }}
+                                    {{ user_form.first_name.errors|join:", " }}
                                 </div>
-                            {% endif %}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ user_form.last_name.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
 
-            <div class="text-end mt-3">
-                <a href="{% url 'staff:user_list' %}" class="btn btn-secondary me-2">Cancel</a>
-                <button type="submit" class="btn btn-primary">
-                    {% if user_obj %}Update{% else %}Create{% endif %} User
-                </button>
-            </div>
-        </form>
+                        {% if not user_obj %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password</label>
+                                {{ user_form.password1 }}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirm Password</label>
+                                {{ user_form.password2 }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ user_form.is_active }}
+                                <label class="form-check-label">Active Account</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Information -->
+                    <div class="col-md-6">
+                        <h5 class="card-title mb-4">Profile Information</h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            {{ profile_form.phone_number }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Date of Birth</label>
+                            {{ profile_form.date_of_birth }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Shipping Address</label>
+                            {{ profile_form.default_shipping_address }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-between align-items-center">
+                    {% if user_obj %}
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                        <i class="fas fa-trash"></i> Delete User
+                    </button>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% if user_obj %}Update User{% else %}Create User{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+{% if user_obj %}
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the user <strong>{{ user_obj.email }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'staff:user_delete' user_obj.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

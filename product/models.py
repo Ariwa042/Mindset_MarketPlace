@@ -1,5 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from .utils import process_product_image, process_thumbnail
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -96,3 +99,27 @@ class ProductImages(models.Model):
 
     class Meta():
        verbose_name_plural = "Product Images"
+
+@receiver(pre_save, sender=Product)
+def compress_product_images(sender, instance, **kwargs):
+    """Compress product images before saving"""
+    if instance.image:
+        # Check if image was changed
+        try:
+            old_instance = Product.objects.get(pk=instance.pk)
+            if old_instance.image != instance.image:
+                instance.image = process_product_image(instance.image)
+        except Product.DoesNotExist:
+            # New instance
+            instance.image = process_product_image(instance.image)
+
+@receiver(pre_save, sender=ProductImages)
+def compress_additional_images(sender, instance, **kwargs):
+    """Compress additional product images before saving"""
+    if instance.images:
+        try:
+            old_instance = ProductImages.objects.get(pk=instance.pk)
+            if old_instance.images != instance.images:
+                instance.images = process_product_image(instance.images)
+        except ProductImages.DoesNotExist:
+            instance.images = process_product_image(instance.images)
