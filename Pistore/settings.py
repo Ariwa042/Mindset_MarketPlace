@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this after security middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',  # Ensure this is present
@@ -72,6 +74,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+            ],
+            'loaders': [
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ]),
             ],
         },
     },
@@ -188,6 +196,41 @@ COMPRESS_JS_FILTERS = [
 ]
 COMPRESS_OFFLINE = True
 COMPRESS_OUTPUT_DIR = 'compressed'
+
+# Whitenoise Configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_COMPRESSION_ENABLED = True
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,  # 5 minutes default timeout
+    },
+    'staticfiles': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'static-files-cache',
+        'TIMEOUT': 60 * 60 * 24 * 7,  # 1 week for static files
+    }
+}
+
+# Cache Settings
+CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutes
+CACHE_MIDDLEWARE_KEY_PREFIX = 'pistore'
+USE_ETAGS = True
+
+# Cache Busting
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Additional Whitenoise Settings
+WHITENOISE_MIMETYPES = {
+    '.xsl': 'application/xml',
+    '.webmanifest': 'application/manifest+json',
+}
 
 # Jazzmin Settings
 JAZZMIN_SETTINGS = {
