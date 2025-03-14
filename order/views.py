@@ -14,7 +14,7 @@ def cart_detail(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
     return render(request, 'order/cart_detail.html', {'cart': cart})
 
-@login_required
+@login_required(login_url='userauth:signin')
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart, created = Cart.objects.get_or_create(user=request.user)

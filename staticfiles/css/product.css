@@ -115,6 +115,15 @@
     padding: 2rem 0;
 }
 
+/* Remove all category navigation related styles */
+.category-nav,
+.category-group,
+.category-item,
+.subcategories-menu,
+.subcategory-item {
+    /* These styles are now handled in style.css */
+}
+
 /* Product Cards */
 .product-card {
     background: white;

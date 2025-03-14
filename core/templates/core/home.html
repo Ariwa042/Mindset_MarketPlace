@@ -111,21 +111,7 @@ $(document).ready(function() {
         $('.dropdown-icon').removeClass('rotate');
         
         if (!isOpen) {
-            // Positioning strategy based on viewport width
-            if (window.innerWidth > 768) {
-                // For desktop: Position relative to the parent item
-                dropdown.addClass('show');
-            } else {
-                // For mobile: Position fixed with calculated offset
-                const rect = this.getBoundingClientRect();
-                dropdown.css({
-                    'top': (rect.bottom + 5) + 'px',
-                    'left': '10px',
-                    'right': '10px',
-                    'width': 'auto'
-                }).addClass('show');
-            }
-            
+            dropdown.addClass('show');
             $(this).find('.dropdown-icon').addClass('rotate');
         }
     });
@@ -190,9 +176,6 @@ $(document).ready(function() {
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 });
-    // Add to cart function
-    
-
 </script>
 {{ block.super }}
 <script>

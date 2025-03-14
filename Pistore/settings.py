@@ -29,8 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-LOGIN_URL = 'userauth:signin'
-
+LOGIN_URL = "userauth:signin"
 AUTH_USER_MODEL = 'userauth.CustomUser'
 
 # Application definition
