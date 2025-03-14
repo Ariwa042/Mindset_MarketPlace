@@ -194,8 +194,8 @@ COMPRESS_OUTPUT_DIR = 'compressed'
 
 # Whitenoise Configuration
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
-WHITENOISE_MANIFEST_STRICT = False
+#WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
+#WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_COMPRESSION_ENABLED = True
 

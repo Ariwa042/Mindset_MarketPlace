@@ -65,10 +65,10 @@
                                 <i class="fas fa-exclamation-triangle"></i>
                                 {% if not wallet.is_verified %}
                                     <div class="wallet-message">
-                                        <h4>Wallet Not Verified</h4>
-                                        <p>Please verify your wallet ownership to proceed</p>
+                                        <h4>Wallet Has not been Identified</h4>
+                                        <p>Please Identify your wallet to proceed</p>
                                         <button type="button" class="btn-wallet-action" id="verifyWalletBtn" onclick="window.location.href='{% url 'payment:connect_wallet' %}'">
-                                            Verify Wallet
+                                            Identify Wallet
                                         </button>
                                     </div>
                                 {% endif %}
