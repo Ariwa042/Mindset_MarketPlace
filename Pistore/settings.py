@@ -193,33 +193,32 @@ COMPRESS_OFFLINE = True
 COMPRESS_OUTPUT_DIR = 'compressed'
 
 # Whitenoise Configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_COMPRESSION_ENABLED = True
 
 # Cache Configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-        'TIMEOUT': 300,  # 5 minutes default timeout
-    },
-    'staticfiles': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'static-files-cache',
-        'TIMEOUT': 60 * 60 * 24 * 7,  # 1 week for static files
-    }
-}
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#        'LOCATION': 'unique-snowflake',
+#        'TIMEOUT': 300,  # 5 minutes default timeout
+#    },
+#    'staticfiles': {
+#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#        'LOCATION': 'static-files-cache',
+#        'TIMEOUT': 60 * 60 * 24 * 7,  # 1 week for static files
+#    }
+#}
 
 # Cache Settings
-CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutes
-CACHE_MIDDLEWARE_KEY_PREFIX = 'pistore'
-USE_ETAGS = True
+#CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutes
+#CACHE_MIDDLEWARE_KEY_PREFIX = 'pistore'
+#USE_ETAGS = True
 
 # Cache Busting
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Additional Whitenoise Settings
 WHITENOISE_MIMETYPES = {
