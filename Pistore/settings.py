@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+LOGIN_URL = 'userauth:signin'
+
 AUTH_USER_MODEL = 'userauth.CustomUser'
 
 # Application definition
@@ -155,12 +157,12 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST = smtp.gmail.com
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'piphrase042@gmail.com'
+EMAIL_HOST_PASSWORD = 'gpax zbei vpyk mspr'
+DEFAULT_FROM_EMAIL = 'Pi Marketplace <piphrase042@gmail.com>'
 #DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Add CSRF settings
