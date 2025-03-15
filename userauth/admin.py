@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, OTP, Profile
+from .models import CustomUser, Profile
 
 class ProfileInline(admin.StackedInline):
     model = Profile
@@ -16,4 +16,3 @@ class CustomUserAdmin(UserAdmin):
     get_phone_number.short_description = 'Phone Number'
 
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(OTP)

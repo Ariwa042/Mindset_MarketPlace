@@ -53,16 +53,6 @@ class SignInForm(AuthenticationForm):
         })
     )
 
-class OTPVerificationForm(forms.Form):
-    otp = forms.CharField(
-        label='Enter OTP',
-        max_length=6,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter 6-digit OTP'
-        })
-    )
-
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile

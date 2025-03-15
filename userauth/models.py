@@ -67,7 +67,6 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=15, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     default_shipping_address = models.TextField(blank=True)
- #   account_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -89,16 +88,4 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=CustomUser)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-
-class OTP(models.Model):
-    email = models.EmailField(null=True, blank=True)
-    otp = models.CharField(max_length=6)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def is_valid(self):
-        return self.expires_at > timezone.now()
 

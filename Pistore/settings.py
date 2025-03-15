@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-a)+v_7^v67f-i#z!zy)-k4hb#ifjm37_t3t57h_ru(8^u&@umi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'https://pimarketplace.shop','pimarketplace.shop']
 
 LOGIN_URL = "userauth:signin"
 AUTH_USER_MODEL = 'userauth.CustomUser'
@@ -169,10 +169,9 @@ CSRF_COOKIE_SECURE = True  # for HTTPS
 CSRF_COOKIE_HTTPONLY = True
 
 
-CSRF_TRUSTED_ORIGINS = ['https://yoursite.com']  # Update with your domain# Add CSRF settings
+CSRF_TRUSTED_ORIGINS = ['https://pimarketplace.shop']  # Update with your domain# Add CSRF settings
 CSRF_COOKIE_SECURE = True  # for HTTPS
 CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ['https://yoursite.com']  # Update with your domain
 
 # Django Compressor Settings
 STATICFILES_FINDERS = [
