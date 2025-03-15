@@ -109,13 +109,32 @@ def forgotten_password(request):
             user = User.objects.get(email=email)
             # Store user_id in session for password change
             request.session['reset_user_id'] = user.id
-            return redirect('userauth:change_password')
+            return redirect('userauth:reset_password')
             
         except ObjectDoesNotExist:
             messages.error(request, 'No user found with this email address.')
             
     return render(request, 'userauth/forgot_password.html')
 
+def reset_password(request):
+    """reset user password"""
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+
+        if not request.user.check_password(old_password):
+            messages.error(request, 'Your old password was entered incorrectly.')
+        elif new_password1 != new_password2:
+            messages.error(request, 'The two password fields didn’t match.')
+        else:
+            request.user.set_password(new_password1)
+            request.user.save()
+            login(request, request.user)  # Keep user logged in
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('userauth:profile_view')
+
+    return render(request, 'userauth/profile/change_password.html')
 # Remove verify_reset_otp function as it's no longer needed
 
 def check_email(request):

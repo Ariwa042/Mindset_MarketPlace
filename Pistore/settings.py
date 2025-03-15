@@ -29,7 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'https://pimarketplace.shop','pimarketplace.shop']
 
-LOGIN_URL = "userauth:signin"
+LOGIN_URL = "/user/signin"
 AUTH_USER_MODEL = 'userauth.CustomUser'
 
 # Application definition
