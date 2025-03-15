@@ -50,10 +50,7 @@ def signout(request):
     messages.success(request, 'You have been logged out.')
     return redirect('core:home')
 
-def password_reset(request):
-    pass
-
-@login_required
+@login_required(login_url='userauth:signin')
 def profile_view(request):
     """View user profile information"""
     orders = request.user.orders.all()[:5]  # Get last 5 orders
