@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Category, SubCategory, Product, ProductImages
 
+class ProductImagesAdmin(admin.TabularInline):
+    model = ProductImages
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'is_active', 'created_at']
@@ -17,6 +20,7 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    inlines = [ProductImagesAdmin]
     list_display = ['name', 'subcategory', 'price', 'stock', 'status', 'is_featured']
     list_filter = ['status', 'is_featured', 'subcategory__category']
     search_fields = ['name', 'description']
@@ -24,5 +28,3 @@ class ProductAdmin(admin.ModelAdmin):
     list_editable = ['price', 'stock', 'status', 'is_featured']
 
 
-class ProductImagesAdmin(admin.TabularInline):
-    model = ProductImages
