@@ -38,8 +38,8 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=32, unique=True, null=True, blank=True)  # Make optional
-    first_name = models.CharField(max_length=30, blank=False)  # Make required
-    last_name = models.CharField(max_length=30, blank=False)   # Make required
+    first_name = models.CharField(max_length=30, blank=True, null=True)  # Make required
+    last_name = models.CharField(max_length=30, blank=True, null=True)   # Make required
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Remove username from required fields
@@ -64,7 +64,7 @@ class CustomUser(AbstractUser):
 
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
-    phone_number = models.CharField(max_length=15, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     default_shipping_address = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
