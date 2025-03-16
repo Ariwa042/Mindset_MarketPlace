@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from userauth import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +29,5 @@ urlpatterns = [
     path('order/', include('order.urls')),
     path('administration/', include('staff.urls')),
     path('payment/', include('payment.urls')),
+    path('signin', views.signin, name='signin'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
