@@ -1,0 +1,438 @@
+:root {
+    --pi-primary: #783a8c;
+    --pi-secondary: #a780b4;
+    --pi-accent: #d4b6e0;
+    --pi-background: #f8f5f9;
+    --pi-surface: #ffffff;
+    --pi-text-primary: #2d1934;
+    --pi-text-secondary: #666666;
+    --pi-border: #e5e7eb;
+    --pi-success: #10B981;
+    --pi-warning: #FBBF24;
+    --pi-error: #EF4444;
+    --header-height: 72px;
+}
+
+/* Header & Container Styles */
+.header {
+    background: var(--pi-primary);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.auth-container {
+    min-height: calc(100vh - var(--header-height));
+    display: flex;
+    align-items: center;
+    padding: 2rem 0;
+    background: var(--pi-background);
+    background-image: linear-gradient(135deg, var(--pi-background) 0%, #fff 100%);
+}
+
+body {
+    background-color: whitesmoke;
+    color: var(--text-color);
+    padding-top: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Card Styles */
+.pi-card, .auth-card {
+    background: var(--pi-surface);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(120, 58, 140, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.pi-card:hover {
+    transform: translateY(-2px);
+}
+
+.pi-card__header, .auth-header {
+    background: var(--pi-primary);
+    padding: 1.5rem 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.pi-card__header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.pi-card__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.auth-body {
+    padding: 2rem;
+}
+
+.auth-form .form-control {
+    border: 2px solid var(--gray-200);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.auth-form .form-control:focus {
+    border-color: var(--pi-purple);
+    box-shadow: 0 0 0 0.2rem rgba(120, 58, 140, 0.15);
+}
+
+.auth-form .form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.1);
+}
+
+.auth-form label {
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+}
+
+a {
+    color: #a780b4;
+}
+
+/* Button Styles */
+.pi-button, .btn-auth {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.pi-button--primary, .btn-auth {
+    background: var(--pi-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(120, 58, 140, 0.2);
+}
+
+.pi-button--primary:hover, .btn-auth:hover {
+    background: #8f45a8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(120, 58, 140, 0.3);
+    color: white;
+}
+
+.pi-button--outline {
+    background: transparent;
+    border: 2px solid var(--pi-primary);
+    color: var(--pi-primary);
+}
+
+.pi-button--outline:hover {
+    background: var(--pi-primary);
+    color: white;
+}
+
+button.btn.btn-primary {
+    background-color: #783a8c;
+    border: none;
+}
+
+button.btn.btn-primary:hover {
+    background-color: var(--pi-purple-dark);
+    border: none;
+}
+
+.btn-auth.btn-outline {
+    background: transparent;
+    color: var(--pi-purple);
+    margin-top: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn-auth.btn-outline:hover {
+    background: var(--pi-purple);
+    color: white;
+}
+
+.auth-footer {
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.auth-footer a {
+    color: var(--pi-purple);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.auth-links a {
+    color: var(--pi-purple);
+    font-size: 0.9rem;
+}
+
+.otp-field {
+    letter-spacing: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+/* Form Validation Styles */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none;
+}
+
+.invalid-feedback {
+    display: none;
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    padding-left: 0.5rem;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+.invalid-feedback.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        margin: 1rem;
+    }
+    
+    .auth-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .auth-body {
+        padding: 1.5rem;
+    }
+}
+
+/* Layout Components */
+.page-container {
+    min-height: 100vh;
+    background: var(--pi-background);
+    padding: 2rem 0;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Card Components */
+.pi-card {
+    background: var(--pi-surface);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.pi-card__header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--pi-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pi-card__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.pi-card__body {
+    padding: 1.5rem;
+}
+
+/* Data Display */
+.info-grid {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.info-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--pi-border);
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--pi-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+.d-flex.justify-content-between.align-items-center.mb-4 {
+    align-items: start;
+    display: inline-block;
+    flex-direction: row;
+}
+
+.info-value {
+    color: var(--pi-text-primary);
+}
+
+/* Buttons */
+.pi-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.pi-button--primary {
+    background: var(--pi-primary);
+    color: white;
+}
+
+.pi-button--outline {
+    background: transparent;
+    border: 2px solid #783a8c;
+    color: #783a8c;
+}
+
+/* Forms */
+.pi-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.pi-input, .form-control {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--pi-border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.pi-input:focus, .form-control:focus {
+    border-color: var(--pi-primary);
+    box-shadow: 0 0 0 3px rgba(120, 58, 140, 0.1);
+    outline: none;
+}
+
+/* Alert Styles */
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: none;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--pi-success);
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--pi-error);
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    background: var(--pi-border);
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+        margin-top: 4em;
+    }
+
+    .info-item {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+
+    .pi-card__header, .auth-header {
+        padding: 1.25rem;
+    }
+
+    .pi-button, .btn-auth {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
