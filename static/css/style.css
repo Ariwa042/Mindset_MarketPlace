@@ -267,8 +267,8 @@
     transform: translateY(0);
     position: fixed;
     top: auto;
-    left: 10px !important;
-    right: 10px;
+    left: 13em !important;
+    right: 10em;
     max-width: calc(100% - 20px);
     width: auto !important;
 }
@@ -296,8 +296,8 @@
     .subcategories-menu {
         position: fixed;
         top: auto;
-        left: 10px !important;
-        right: 10px;
+        left: 13em !important;
+        right: 10em;
         max-width: calc(100% - 20px);
         width: auto !important;
     }
