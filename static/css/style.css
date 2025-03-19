@@ -265,6 +265,12 @@
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    position: fixed;
+    top: auto;
+    left: 10px !important;
+    right: 10px;
+    max-width: calc(100% - 20px);
+    width: auto !important;
 }
 
 .subcategories-menu::before {
