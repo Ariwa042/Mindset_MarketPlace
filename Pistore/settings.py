@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'Pistore.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mindsetmarketplace',
-        'USER': 'mindset',
-        'PASSWORD': 'G1tZORDKhLHyXWJvQp2p9oH13dUN141K',
-        'HOST': 'dpg-cvb26pqn91rc739cgia0-a.frankfurt-postgres.render.com',
-        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': 'postgres.awakavxwbfltomphgeya',
+        'PASSWORD': 'Arinze123.',
+        'HOST': 'aws-0-eu-central-1.pooler.supabase.com',
+        'PORT': '6543',
     }
 }
 
